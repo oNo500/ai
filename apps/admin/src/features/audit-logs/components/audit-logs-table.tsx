@@ -11,7 +11,7 @@ import { DataTable } from '@/components/data-table/data-table'
 import { AuditActionBadge } from '@/features/audit-logs/components/audit-action-badge'
 import { AuditDetailView } from '@/features/audit-logs/components/audit-detail-view'
 
-import type { components } from '@/types/openapi'
+import type { components } from '@workspace/schema/api'
 import type { ColumnDef } from '@tanstack/react-table'
 
 type AuditLogRow = components['schemas']['AuditLogResponseDto']

@@ -18,7 +18,7 @@ import {
 import { ArticleActionsMenu } from '@/features/articles/components/article-actions-menu'
 import { ArticleStatusBadge } from '@/features/articles/components/article-status-badge'
 
-import type { components } from '@/types/openapi'
+import type { components } from '@workspace/schema/api'
 import type { ColumnDef } from '@tanstack/react-table'
 
 type ArticleRow = components['schemas']['ArticleResponseDto']

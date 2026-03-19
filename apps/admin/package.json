@@ -10,7 +10,7 @@
     "lint:fix": "eslint --fix",
     "typecheck": "tsc -b --noEmit",
     "test": "vitest",
-    "api:gen": "openapi-typescript http://localhost:3000/openapi.yaml -o src/types/openapi.d.ts"
+    "api:gen": "pnpm --filter @workspace/schema gen"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
@@ -19,6 +19,7 @@
     "@tanstack/react-query": "^5.90.21",
     "@tanstack/react-table": "^8.21.3",
     "@workspace/icons": "workspace:*",
+    "@workspace/schema": "workspace:*",
     "@workspace/ui": "workspace:*",
     "lucide-react": "^0.577.0",
     "motion": "^12.35.1",
@@ -50,7 +51,6 @@
     "eslint": "^10.0.3",
     "jsdom": "^28.1.0",
     "msw": "^2.12.10",
-    "openapi-typescript": "^7.13.0",
     "tailwindcss": "^4.2.1",
     "typescript": "^5.9.3",
     "vite-tsconfig-paths": "^6.1.1",

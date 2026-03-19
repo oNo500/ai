@@ -1,6 +1,7 @@
 .PHONY: install install-js install-py
 .PHONY: dev dev-js dev-agent
 .PHONY: build test lint format typecheck
+.PHONY: schema schema-api schema-agentic
 .PHONY: setup-env
 
 # ── Install ────────────────────────────────────────────────────────────────────
@@ -45,6 +46,17 @@ format:
 
 typecheck:
 	pnpm typecheck
+
+# ── Schema codegen ─────────────────────────────────────────────────────────────
+# Requires services to be running: make docker-up && make dev-js / make dev-agent
+
+schema: schema-api schema-agentic
+
+schema-api:
+	pnpm --filter @workspace/schema gen:api
+
+schema-agentic:
+	pnpm --filter @workspace/schema gen:agentic
 
 # ── Docker ─────────────────────────────────────────────────────────────────────
 

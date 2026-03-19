@@ -29,7 +29,7 @@ import { toast } from 'sonner'
 
 import { $api } from '@/lib/api'
 
-import type { components } from '@/types/openapi'
+import type { components } from '@workspace/schema/api'
 
 type SessionItem = components['schemas']['SessionItemDto']
 
