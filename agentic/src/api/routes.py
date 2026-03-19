@@ -4,11 +4,11 @@ from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 
-from app.agent.registry import get_default_agent, global_registry
-from app.agent.schemas import InvokeRequest, InvokeResponse
-from app.agent.spec import AgentSpec
-from app.middleware.ratelimit import RateLimiter
-from app.settings import get_settings
+from src.agent.registry import get_default_agent, global_registry
+from src.agent.schemas import InvokeRequest, InvokeResponse
+from src.agent.spec import AgentSpec
+from src.middleware.ratelimit import RateLimiter
+from src.settings import get_settings
 
 router = APIRouter()
 

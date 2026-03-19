@@ -6,7 +6,7 @@ class TestRequestIdMiddleware:
     async def test_request_id_header_injected(self):
         from fastapi.testclient import TestClient
 
-        from app.main import app
+        from src.main import app
 
         with TestClient(app) as client:
             resp = client.get("/health")
@@ -18,7 +18,7 @@ class TestRequestIdMiddleware:
 
         from fastapi.testclient import TestClient
 
-        from app.main import app
+        from src.main import app
 
         with TestClient(app) as client:
             resp = client.get("/health")
@@ -29,7 +29,7 @@ class TestRequestIdMiddleware:
     async def test_custom_request_id_forwarded(self):
         from fastapi.testclient import TestClient
 
-        from app.main import app
+        from src.main import app
 
         with TestClient(app) as client:
             resp = client.get("/health", headers={"x-request-id": "my-trace-id"})
@@ -39,13 +39,13 @@ class TestRequestIdMiddleware:
 
 class TestStructuredLogger:
     def test_get_logger_returns_logger(self):
-        from app.logging import get_logger
+        from src.logging import get_logger
 
         logger = get_logger("test")
         assert logger is not None
 
     def test_logger_bind_returns_bound_logger(self):
-        from app.logging import get_logger
+        from src.logging import get_logger
 
         logger = get_logger("test")
         bound = logger.bind(request_id="r-1", user_id="u-1")

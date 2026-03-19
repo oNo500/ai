@@ -5,13 +5,13 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 class TestAgentSpecRole:
     def test_spec_default_role_is_worker(self):
-        from app.agent.spec import AgentSpec
+        from src.agent.spec import AgentSpec
 
         spec = AgentSpec(name="bot")
         assert spec.role == "worker"
 
     def test_spec_orchestrator_role(self):
-        from app.agent.spec import AgentSpec
+        from src.agent.spec import AgentSpec
 
         spec = AgentSpec(name="orchestrator", role="orchestrator")
         assert spec.role == "orchestrator"
@@ -19,8 +19,8 @@ class TestAgentSpecRole:
 
 class TestOrchestratorTools:
     def test_orchestrator_tools_include_all_workers(self):
-        from app.agent.registry import AgentRegistry
-        from app.agent.spec import AgentSpec
+        from src.agent.registry import AgentRegistry
+        from src.agent.spec import AgentSpec
 
         reg = AgentRegistry()
 
@@ -46,8 +46,8 @@ class TestOrchestratorTools:
         assert "coder" in tool_names
 
     def test_get_worker_tools_excludes_orchestrators(self):
-        from app.agent.registry import AgentRegistry
-        from app.agent.spec import AgentSpec
+        from src.agent.registry import AgentRegistry
+        from src.agent.spec import AgentSpec
 
         reg = AgentRegistry()
 
@@ -75,7 +75,7 @@ class TestOrchestrateEndpoint:
     async def test_orchestrate_endpoint_returns_result(self):
         from fastapi.testclient import TestClient
 
-        from app.main import app
+        from src.main import app
 
         mock_agent = MagicMock()
         mock_agent.ainvoke = AsyncMock(

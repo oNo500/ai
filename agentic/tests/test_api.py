@@ -36,7 +36,7 @@ def client(mock_agent, mock_redis):
     with patch("app.api.routes.get_default_agent", return_value=mock_agent):
         with patch("app.main.aioredis") as mock_aioredis:
             mock_aioredis.from_url.return_value = mock_redis
-            from app.main import app
+            from src.main import app
 
             with TestClient(app) as c:
                 yield c
@@ -64,7 +64,7 @@ class TestInvoke:
         with patch("app.api.routes.get_default_agent", return_value=mock_agent):
             with patch("app.main.aioredis") as mock_aioredis:
                 mock_aioredis.from_url.return_value = mock_redis
-                from app.main import app
+                from src.main import app
 
                 with TestClient(app) as client:
                     client.post("/invoke", json={"message": "Hello", "session_id": "sess-42"})
@@ -77,7 +77,7 @@ class TestInvoke:
         with patch("app.api.routes.get_default_agent", return_value=mock_agent):
             with patch("app.main.aioredis") as mock_aioredis:
                 mock_aioredis.from_url.return_value = mock_redis
-                from app.main import app
+                from src.main import app
 
                 with TestClient(app) as client:
                     client.post("/invoke", json={"message": "Hello"})
@@ -89,7 +89,7 @@ class TestInvoke:
         with patch("app.api.routes.get_default_agent", return_value=mock_agent):
             with patch("app.main.aioredis") as mock_aioredis:
                 mock_aioredis.from_url.return_value = mock_redis
-                from app.main import app
+                from src.main import app
 
                 with TestClient(app) as client:
                     client.post("/invoke", json={"message": "Hello", "user_id": "alice"})
@@ -101,7 +101,7 @@ class TestInvoke:
         with patch("app.api.routes.get_default_agent", return_value=mock_agent):
             with patch("app.main.aioredis") as mock_aioredis:
                 mock_aioredis.from_url.return_value = mock_redis
-                from app.main import app
+                from src.main import app
 
                 with TestClient(app) as client:
                     client.post("/invoke", json={"message": "Hello"})
@@ -131,7 +131,7 @@ class TestStream:
         with patch("app.api.routes.get_default_agent", return_value=mock_agent):
             with patch("app.main.aioredis") as mock_aioredis:
                 mock_aioredis.from_url.return_value = mock_redis
-                from app.main import app
+                from src.main import app
 
                 with TestClient(app) as c:
                     c.post("/stream", json={"message": "Hello", "user_id": "bob"})

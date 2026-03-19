@@ -2,7 +2,7 @@ from datetime import UTC, datetime
 
 from langchain_core.tools import tool
 
-from app.agent.tools.base import ToolRegistry
+from src.agent.tools.base import ToolRegistry
 
 registry = ToolRegistry()
 

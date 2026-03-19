@@ -7,7 +7,7 @@ class TestToolRegistry:
     def test_register_and_get(self):
         from langchain_core.tools import tool
 
-        from app.agent.tools.base import ToolRegistry
+        from src.agent.tools.base import ToolRegistry
 
         @tool
         def dummy_tool() -> str:
@@ -20,7 +20,7 @@ class TestToolRegistry:
         assert result is dummy_tool
 
     def test_get_missing_raises_key_error(self):
-        from app.agent.tools.base import ToolRegistry
+        from src.agent.tools.base import ToolRegistry
 
         reg = ToolRegistry()
         with pytest.raises(KeyError):
@@ -29,7 +29,7 @@ class TestToolRegistry:
     def test_by_tags_returns_matching(self):
         from langchain_core.tools import tool
 
-        from app.agent.tools.base import ToolRegistry
+        from src.agent.tools.base import ToolRegistry
 
         @tool
         def tool_a() -> str:
@@ -52,7 +52,7 @@ class TestToolRegistry:
     def test_names_returns_all_names(self):
         from langchain_core.tools import tool
 
-        from app.agent.tools.base import ToolRegistry
+        from src.agent.tools.base import ToolRegistry
 
         @tool
         def my_tool() -> str:
@@ -66,7 +66,7 @@ class TestToolRegistry:
     def test_all_returns_all_tools(self):
         from langchain_core.tools import tool
 
-        from app.agent.tools.base import ToolRegistry
+        from src.agent.tools.base import ToolRegistry
 
         @tool
         def another_tool() -> str:
@@ -80,19 +80,19 @@ class TestToolRegistry:
 
 class TestBuiltinTools:
     def test_get_current_time_registered(self):
-        from app.agent.tools import registry
+        from src.agent.tools import registry
 
         assert "get_current_time" in registry.names()
 
     def test_get_current_time_has_utility_tag(self):
-        from app.agent.tools import registry
+        from src.agent.tools import registry
 
         time_tools = registry.by_tags("utility")
         names = [t.name for t in time_tools]
         assert "get_current_time" in names
 
     def test_get_current_time_returns_string(self):
-        from app.agent.tools import registry
+        from src.agent.tools import registry
 
         tool = registry.get("get_current_time")
         result = tool.invoke({})

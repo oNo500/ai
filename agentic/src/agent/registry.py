@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from langchain_core.tools import BaseTool
 
-from app.agent.factory import ProductionAgent, create_production_agent
-from app.agent.spec import AgentSpec
+from src.agent.factory import ProductionAgent, create_production_agent
+from src.agent.spec import AgentSpec
 
 
 class AgentRegistry:
@@ -27,7 +27,7 @@ class AgentRegistry:
         return list(self._agents.keys())
 
     def get_worker_tools(self) -> list[BaseTool]:
-        from app.agent.tools.subagent import make_subagent_tool
+        from src.agent.tools.subagent import make_subagent_tool
 
         return [
             make_subagent_tool(name, agent)
@@ -37,7 +37,7 @@ class AgentRegistry:
 
 
 def _build_global_registry() -> AgentRegistry:
-    from app.agent.tools import registry as tool_registry
+    from src.agent.tools import registry as tool_registry
 
     reg = AgentRegistry()
     spec = AgentSpec(

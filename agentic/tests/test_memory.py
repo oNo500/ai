@@ -10,13 +10,13 @@ class TestBuildCheckpointer:
     def test_memory_backend_returns_in_memory_saver(self):
         from langgraph.checkpoint.memory import InMemorySaver
 
-        from app.agent.memory import build_checkpointer
+        from src.agent.memory import build_checkpointer
 
         cp = build_checkpointer("memory")
         assert isinstance(cp, InMemorySaver)
 
     def test_unknown_backend_raises(self):
-        from app.agent.memory import build_checkpointer
+        from src.agent.memory import build_checkpointer
 
         with pytest.raises(ValueError, match="Unknown"):
             build_checkpointer("unknown_backend")
@@ -24,14 +24,14 @@ class TestBuildCheckpointer:
 
 class TestMemoryManager:
     def test_init_with_memory_backend(self):
-        from app.agent.memory import MemoryManager
+        from src.agent.memory import MemoryManager
 
         mgr = MemoryManager(backend="memory", enable_long_term=False)
         assert mgr.checkpointer is not None
         assert mgr._long_term is None
 
     async def test_inject_long_term_context_no_op_when_disabled(self):
-        from app.agent.memory import MemoryManager
+        from src.agent.memory import MemoryManager
 
         mgr = MemoryManager(backend="memory", enable_long_term=False)
         messages = [HumanMessage(content="hello")]
@@ -39,7 +39,7 @@ class TestMemoryManager:
         assert result == messages
 
     async def test_save_session_no_op_when_disabled(self):
-        from app.agent.memory import MemoryManager
+        from src.agent.memory import MemoryManager
 
         mgr = MemoryManager(backend="memory", enable_long_term=False)
         # Should not raise
@@ -51,7 +51,7 @@ class TestMemoryManager:
         )
 
     async def test_inject_long_term_context_with_long_term(self):
-        from app.agent.memory import MemoryManager
+        from src.agent.memory import MemoryManager
 
         mock_lt = AsyncMock()
         mock_lt.format_for_prompt = AsyncMock(return_value="## Memory\n- User likes Python")
@@ -65,7 +65,7 @@ class TestMemoryManager:
         assert any(isinstance(m, SystemMessage) for m in result)
 
     async def test_save_session_calls_long_term(self):
-        from app.agent.memory import MemoryManager
+        from src.agent.memory import MemoryManager
 
         mock_lt = AsyncMock()
         mock_lt.add = AsyncMock(return_value=[])
@@ -80,7 +80,7 @@ class TestMemoryManager:
 
 class TestLongTermMemoryConfig:
     def test_build_client_uses_from_config_when_config_provided(self):
-        from app.agent.memory import LongTermMemory
+        from src.agent.memory import LongTermMemory
 
         fake_client = object()
         config = {"vector_store": {"provider": "qdrant", "config": {"host": "localhost"}}}
@@ -93,7 +93,7 @@ class TestLongTermMemoryConfig:
         assert lt._client is fake_client
 
     def test_build_client_uses_default_when_no_config(self):
-        from app.agent.memory import LongTermMemory
+        from src.agent.memory import LongTermMemory
 
         fake_client = object()
 
@@ -105,7 +105,7 @@ class TestLongTermMemoryConfig:
         assert lt._client is fake_client
 
     def test_memory_manager_passes_config_to_long_term(self):
-        from app.agent.memory import LongTermMemory, MemoryManager
+        from src.agent.memory import LongTermMemory, MemoryManager
 
         config = {"vector_store": {"provider": "qdrant", "config": {}}}
 
@@ -117,14 +117,14 @@ class TestLongTermMemoryConfig:
 
 class TestSettingsMem0Config:
     def test_settings_has_mem0_vector_store_provider(self):
-        from app.settings import Settings
+        from src.settings import Settings
 
         s = Settings()
         assert hasattr(s, "mem0_vector_store_provider")
         assert s.mem0_vector_store_provider == "memory"
 
     def test_settings_builds_mem0_config_for_qdrant(self):
-        from app.settings import Settings
+        from src.settings import Settings
 
         s = Settings(
             mem0_vector_store_provider="qdrant",
@@ -137,7 +137,7 @@ class TestSettingsMem0Config:
         assert cfg["vector_store"]["config"]["collection_name"] == "test"
 
     def test_settings_returns_none_for_memory_provider(self):
-        from app.settings import Settings
+        from src.settings import Settings
 
         s = Settings(mem0_vector_store_provider="memory")
         assert s.build_mem0_config() is None

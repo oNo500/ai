@@ -7,10 +7,10 @@ from typing import Any
 
 from langchain_openai import ChatOpenAI
 
-from app.agent.graph import build_graph
-from app.agent.memory import MemoryManager
-from app.agent.spec import AgentSpec
-from app.settings import get_settings
+from src.agent.graph import build_graph
+from src.agent.memory import MemoryManager
+from src.agent.spec import AgentSpec
+from src.settings import get_settings
 
 logger = logging.getLogger(__name__)
 

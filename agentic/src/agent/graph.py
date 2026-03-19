@@ -4,8 +4,8 @@ from langchain_core.tools import BaseTool
 from langgraph.graph import END, StateGraph
 from langgraph.prebuilt import ToolNode
 
-from app.agent.nodes import should_continue
-from app.agent.state import AgentState
+from src.agent.nodes import should_continue
+from src.agent.state import AgentState
 
 
 def build_graph(
@@ -14,7 +14,7 @@ def build_graph(
     checkpointer: Any,
     spec: Any = None,
 ) -> Any:
-    from app.agent.nodes import make_node_call_model
+    from src.agent.nodes import make_node_call_model
 
     enable_reflection = spec.enable_reflection if spec is not None else False
     max_reflections = spec.max_reflections if spec is not None else 2
@@ -29,14 +29,14 @@ def build_graph(
     terminal = END
 
     if enable_guardrails:
-        from app.agent.guardrails import after_guardrail, make_node_guardrail
+        from src.agent.guardrails import after_guardrail, make_node_guardrail
 
         builder.add_node("guardrail", make_node_guardrail(llm))
         builder.add_conditional_edges("guardrail", after_guardrail, {"__end__": END})
         terminal = "guardrail"
 
     if enable_reflection:
-        from app.agent.reflection import after_reflect, make_node_reflect
+        from src.agent.reflection import after_reflect, make_node_reflect
 
         builder.add_node("reflect", make_node_reflect(llm))
         builder.add_conditional_edges(

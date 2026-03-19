@@ -1,18 +1,16 @@
-version: '3.8'
-
 services:
   postgres:
-    image: bitnami/postgresql:latest
+    image: pgvector/pgvector:pg16
     container_name: postgres
     restart: unless-stopped
     environment:
-      - POSTGRESQL_USERNAME=postgres
-      - POSTGRESQL_PASSWORD=postgres
-      - POSTGRESQL_DATABASE=postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
     ports:
       - "5432:5432"
     volumes:
-      - postgres_data:/bitnami/postgresql
+      - postgres_data:/var/lib/postgresql/data
 
   redis:
     image: redis:7-alpine

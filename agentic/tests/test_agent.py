@@ -5,7 +5,7 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
 
-from app.agent.state import AgentState
+from src.agent.state import AgentState
 
 
 @pytest.fixture
@@ -24,8 +24,8 @@ def final_state() -> AgentState:
 
 class TestSystemPromptInjection:
     async def test_ainvoke_injects_system_prompt(self):
-        from app.agent.factory import ProductionAgent
-        from app.agent.spec import AgentSpec
+        from src.agent.factory import ProductionAgent
+        from src.agent.spec import AgentSpec
 
         mock_compiled = MagicMock()
         mock_compiled.ainvoke = AsyncMock(
@@ -43,8 +43,8 @@ class TestSystemPromptInjection:
         assert messages[0].content == "You are a helpful assistant."
 
     async def test_ainvoke_no_system_prompt_skips_injection(self):
-        from app.agent.factory import ProductionAgent
-        from app.agent.spec import AgentSpec
+        from src.agent.factory import ProductionAgent
+        from src.agent.spec import AgentSpec
 
         mock_compiled = MagicMock()
         mock_compiled.ainvoke = AsyncMock(
@@ -61,8 +61,8 @@ class TestSystemPromptInjection:
         assert not isinstance(messages[0], SystemMessage)
 
     async def test_astream_yields_tuples(self):
-        from app.agent.factory import ProductionAgent
-        from app.agent.spec import AgentSpec
+        from src.agent.factory import ProductionAgent
+        from src.agent.spec import AgentSpec
 
         async def mock_astream(state, config=None, stream_mode=None):
             yield (AIMessage(content="Hi"), {})
@@ -83,8 +83,8 @@ class TestSystemPromptInjection:
         assert meta == {}
 
     async def test_astream_injects_system_prompt(self):
-        from app.agent.factory import ProductionAgent
-        from app.agent.spec import AgentSpec
+        from src.agent.factory import ProductionAgent
+        from src.agent.spec import AgentSpec
 
         captured_states = []
 
@@ -108,7 +108,7 @@ class TestSystemPromptInjection:
 
 class TestAgentStateFields:
     def test_agent_state_has_user_id_field(self):
-        from app.agent.state import AgentState
+        from src.agent.state import AgentState
 
         state: AgentState = {
             "messages": [],
@@ -119,8 +119,8 @@ class TestAgentStateFields:
         assert state["session_id"] == "sess-abc"
 
     async def test_ainvoke_passes_user_id_and_session_id_in_state(self):
-        from app.agent.factory import ProductionAgent
-        from app.agent.spec import AgentSpec
+        from src.agent.factory import ProductionAgent
+        from src.agent.spec import AgentSpec
 
         captured_states = []
 
@@ -141,8 +141,8 @@ class TestAgentStateFields:
         assert captured_states[0]["session_id"] == "t42"
 
     async def test_ainvoke_state_has_all_fields(self):
-        from app.agent.factory import ProductionAgent
-        from app.agent.spec import AgentSpec
+        from src.agent.factory import ProductionAgent
+        from src.agent.spec import AgentSpec
 
         captured_states = []
 
@@ -168,8 +168,8 @@ class TestAgentStateFields:
         assert state["block_reason"] is None
 
     async def test_astream_state_has_all_fields(self):
-        from app.agent.factory import ProductionAgent
-        from app.agent.spec import AgentSpec
+        from src.agent.factory import ProductionAgent
+        from src.agent.spec import AgentSpec
 
         captured_states = []
 
@@ -197,8 +197,8 @@ class TestAgentStateFields:
 
 class TestAstreamMemory:
     async def test_astream_calls_inject_long_term_context_when_memory_exists(self):
-        from app.agent.factory import ProductionAgent
-        from app.agent.spec import AgentSpec
+        from src.agent.factory import ProductionAgent
+        from src.agent.spec import AgentSpec
 
         mock_memory = AsyncMock()
         mock_memory.inject_long_term_context = AsyncMock(
@@ -224,8 +224,8 @@ class TestAstreamMemory:
         )
 
     async def test_astream_skips_inject_when_no_memory(self):
-        from app.agent.factory import ProductionAgent
-        from app.agent.spec import AgentSpec
+        from src.agent.factory import ProductionAgent
+        from src.agent.spec import AgentSpec
 
         async def mock_astream(state, config=None, stream_mode=None):
             yield (AIMessage(content="Hi"), {})
@@ -245,13 +245,13 @@ class TestAstreamMemory:
 
 class TestShouldContinue:
     def test_continues_when_tool_calls_present(self, tool_call_state):
-        from app.agent.nodes import should_continue
+        from src.agent.nodes import should_continue
 
         result = should_continue(tool_call_state)
         assert result == "tools"
 
     def test_ends_when_no_tool_calls(self, final_state):
-        from app.agent.nodes import should_continue
+        from src.agent.nodes import should_continue
 
         result = should_continue(final_state)
         assert result == "__end__"

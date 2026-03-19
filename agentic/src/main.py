@@ -11,8 +11,8 @@ from fastapi import FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from scalar_fastapi import get_scalar_api_reference
 
-from app.api.routes import router
-from app.settings import get_settings
+from src.api.routes import router
+from src.settings import get_settings
 
 load_dotenv()
 
@@ -37,7 +37,7 @@ async def lifespan(app: FastAPI):
     app.state.redis = redis_task.result()
 
     try:
-        from app.agent.tools.rag import VectorStore
+        from src.agent.tools.rag import VectorStore
 
         app.state.vector_store = VectorStore()
     except Exception:

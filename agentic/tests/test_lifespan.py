@@ -15,7 +15,7 @@ class TestLifespan:
 
             from fastapi.testclient import TestClient
 
-            from app.main import app
+            from src.main import app
 
             with TestClient(app):
                 assert hasattr(app.state, "redis")
@@ -30,7 +30,7 @@ class TestLifespan:
 
             from fastapi.testclient import TestClient
 
-            from app.main import app
+            from src.main import app
 
             with TestClient(app):
                 pass
@@ -60,7 +60,7 @@ class TestLangSmithLifespan:
 
             from fastapi.testclient import TestClient
 
-            from app.main import app
+            from src.main import app
 
             with TestClient(app):
                 assert os.environ.get("LANGCHAIN_TRACING_V2") == "true"
@@ -80,7 +80,7 @@ class TestLangSmithLifespan:
 
             from fastapi.testclient import TestClient
 
-            from app.main import app
+            from src.main import app
 
             with TestClient(app):
                 assert "LANGCHAIN_TRACING_V2" not in os.environ

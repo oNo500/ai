@@ -7,7 +7,7 @@ from langchain_core.messages import AIMessage, HumanMessage
 
 class TestGuardrailNode:
     async def test_safe_output_passes_through(self):
-        from app.agent.guardrails import make_node_guardrail
+        from src.agent.guardrails import make_node_guardrail
 
         mock_llm = MagicMock()
         mock_llm.ainvoke = AsyncMock(
@@ -27,7 +27,7 @@ class TestGuardrailNode:
         assert result.get("block_reason") is None
 
     async def test_unsafe_output_sets_blocked(self):
-        from app.agent.guardrails import make_node_guardrail
+        from src.agent.guardrails import make_node_guardrail
 
         mock_llm = MagicMock()
         mock_llm.ainvoke = AsyncMock(
@@ -47,7 +47,7 @@ class TestGuardrailNode:
         assert result.get("block_reason") is not None
 
     async def test_deterministic_length_check_blocks_long_input(self):
-        from app.agent.guardrails import check_input
+        from src.agent.guardrails import check_input
 
         long_input = "x" * 10001
         result = check_input(long_input)
@@ -55,7 +55,7 @@ class TestGuardrailNode:
         assert "too long" in result["reason"].lower()
 
     async def test_deterministic_length_check_passes_normal_input(self):
-        from app.agent.guardrails import check_input
+        from src.agent.guardrails import check_input
 
         result = check_input("hello world")
         assert result["safe"] is True
@@ -63,7 +63,7 @@ class TestGuardrailNode:
 
 class TestAfterGuardrail:
     def test_routes_to_end_when_safe(self):
-        from app.agent.guardrails import after_guardrail
+        from src.agent.guardrails import after_guardrail
 
         state = {
             "messages": [],
@@ -76,7 +76,7 @@ class TestAfterGuardrail:
         assert after_guardrail(state) == "__end__"
 
     def test_routes_to_end_when_blocked(self):
-        from app.agent.guardrails import after_guardrail
+        from src.agent.guardrails import after_guardrail
 
         state = {
             "messages": [],
@@ -91,7 +91,7 @@ class TestAfterGuardrail:
 
 class TestAgentStateGuardrailFields:
     def test_state_has_blocked_field(self):
-        from app.agent.state import AgentState
+        from src.agent.state import AgentState
 
         state: AgentState = {
             "messages": [],
@@ -107,8 +107,8 @@ class TestAgentStateGuardrailFields:
 
 class TestBuildGraphGuardrails:
     def test_graph_includes_guardrail_node_when_enabled(self):
-        from app.agent.graph import build_graph
-        from app.agent.spec import AgentSpec
+        from src.agent.graph import build_graph
+        from src.agent.spec import AgentSpec
 
         mock_llm = MagicMock()
         spec = AgentSpec(name="test", enable_guardrails=True)
@@ -117,8 +117,8 @@ class TestBuildGraphGuardrails:
         assert "guardrail" in graph.get_graph().nodes
 
     def test_graph_excludes_guardrail_node_when_disabled(self):
-        from app.agent.graph import build_graph
-        from app.agent.spec import AgentSpec
+        from src.agent.graph import build_graph
+        from src.agent.spec import AgentSpec
 
         mock_llm = MagicMock()
         spec = AgentSpec(name="test", enable_guardrails=False)

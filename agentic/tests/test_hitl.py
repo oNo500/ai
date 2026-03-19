@@ -5,8 +5,8 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 class TestBuildGraphHITL:
     def test_graph_compiled_with_interrupt_before_tools_when_enabled(self):
-        from app.agent.graph import build_graph
-        from app.agent.spec import AgentSpec
+        from src.agent.graph import build_graph
+        from src.agent.spec import AgentSpec
 
         mock_llm = MagicMock()
         spec = AgentSpec(name="test", enable_human_loop=True)
@@ -23,8 +23,8 @@ class TestBuildGraphHITL:
             assert compile_kwargs.get("interrupt_before") == ["tools"]
 
     def test_graph_compiled_without_interrupt_when_disabled(self):
-        from app.agent.graph import build_graph
-        from app.agent.spec import AgentSpec
+        from src.agent.graph import build_graph
+        from src.agent.spec import AgentSpec
 
         mock_llm = MagicMock()
         spec = AgentSpec(name="test", enable_human_loop=False)
@@ -45,7 +45,7 @@ class TestPendingEndpoint:
     async def test_pending_returns_tool_calls_when_interrupted(self):
         from fastapi.testclient import TestClient
 
-        from app.main import app
+        from src.main import app
 
         mock_agent = MagicMock()
         mock_agent._compiled.get_state = MagicMock(
@@ -80,7 +80,7 @@ class TestPendingEndpoint:
     async def test_pending_returns_not_interrupted_when_running(self):
         from fastapi.testclient import TestClient
 
-        from app.main import app
+        from src.main import app
 
         mock_agent = MagicMock()
         mock_agent._compiled.get_state = MagicMock(
@@ -105,7 +105,7 @@ class TestApproveEndpoint:
     async def test_approve_resumes_execution(self):
         from fastapi.testclient import TestClient
 
-        from app.main import app
+        from src.main import app
 
         mock_agent = MagicMock()
         mock_agent._compiled.ainvoke = AsyncMock(
@@ -128,7 +128,7 @@ class TestApproveEndpoint:
     async def test_approve_calls_ainvoke_with_none_to_resume(self):
         from fastapi.testclient import TestClient
 
-        from app.main import app
+        from src.main import app
 
         mock_agent = MagicMock()
         mock_agent._compiled.ainvoke = AsyncMock(
@@ -153,7 +153,7 @@ class TestRejectEndpoint:
     async def test_reject_returns_final_answer(self):
         from fastapi.testclient import TestClient
 
-        from app.main import app
+        from src.main import app
 
         mock_agent = MagicMock()
         mock_agent._compiled.get_state = MagicMock(
@@ -186,7 +186,7 @@ class TestRejectEndpoint:
     async def test_reject_injects_tool_messages_as_node_tools(self):
         from fastapi.testclient import TestClient
 
-        from app.main import app
+        from src.main import app
 
         mock_agent = MagicMock()
         mock_agent._compiled.get_state = MagicMock(
@@ -219,7 +219,7 @@ class TestRejectEndpoint:
     async def test_reject_uses_reason_in_tool_message_content(self):
         from fastapi.testclient import TestClient
 
-        from app.main import app
+        from src.main import app
 
         mock_agent = MagicMock()
         mock_agent._compiled.get_state = MagicMock(
@@ -254,7 +254,7 @@ class TestRejectEndpoint:
     async def test_reject_resumes_with_ainvoke_none(self):
         from fastapi.testclient import TestClient
 
-        from app.main import app
+        from src.main import app
 
         mock_agent = MagicMock()
         mock_agent._compiled.get_state = MagicMock(

@@ -9,8 +9,8 @@ from langchain_core.tools import BaseTool
 from pydantic import PrivateAttr
 
 if TYPE_CHECKING:
-    from app.agent.factory import ProductionAgent
-    from app.agent.registry import AgentRegistry
+    from src.agent.factory import ProductionAgent
+    from src.agent.registry import AgentRegistry
 
 
 class SubAgentTool(BaseTool):

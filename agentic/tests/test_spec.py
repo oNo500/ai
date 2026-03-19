@@ -7,7 +7,7 @@ from langchain_core.tools import BaseTool
 
 class TestAgentSpec:
     def test_default_fields(self):
-        from app.agent.spec import AgentSpec
+        from src.agent.spec import AgentSpec
 
         spec = AgentSpec(name="test")
         assert spec.name == "test"
@@ -21,13 +21,13 @@ class TestAgentSpec:
         assert spec.enable_long_term_memory is False
 
     def test_enable_long_term_memory_can_be_set(self):
-        from app.agent.spec import AgentSpec
+        from src.agent.spec import AgentSpec
 
         spec = AgentSpec(name="test", enable_long_term_memory=True)
         assert spec.enable_long_term_memory is True
 
     def test_with_tools(self):
-        from app.agent.spec import AgentSpec
+        from src.agent.spec import AgentSpec
 
         mock_tool = MagicMock(spec=BaseTool)
         spec = AgentSpec(name="test", tools=[mock_tool])
@@ -36,8 +36,8 @@ class TestAgentSpec:
 
 class TestProductionAgent:
     def test_create_production_agent_returns_agent(self):
-        from app.agent.factory import create_production_agent
-        from app.agent.spec import AgentSpec
+        from src.agent.factory import create_production_agent
+        from src.agent.spec import AgentSpec
 
         mock_tool = MagicMock(spec=BaseTool)
         mock_tool.name = "test_tool"
@@ -54,7 +54,7 @@ class TestProductionAgent:
 
                 agent = create_production_agent(spec)
 
-        from app.agent.factory import ProductionAgent
+        from src.agent.factory import ProductionAgent
 
         assert isinstance(agent, ProductionAgent)
         assert agent.spec is spec
@@ -62,8 +62,8 @@ class TestProductionAgent:
     async def test_ainvoke_uses_thread_id(self):
         from unittest.mock import AsyncMock
 
-        from app.agent.factory import ProductionAgent
-        from app.agent.spec import AgentSpec
+        from src.agent.factory import ProductionAgent
+        from src.agent.spec import AgentSpec
 
         mock_compiled = MagicMock()
         mock_compiled.ainvoke = AsyncMock(
@@ -80,8 +80,8 @@ class TestProductionAgent:
         assert config["configurable"]["thread_id"] == "thread-123"
 
     async def test_astream_yields_chunks(self):
-        from app.agent.factory import ProductionAgent
-        from app.agent.spec import AgentSpec
+        from src.agent.factory import ProductionAgent
+        from src.agent.spec import AgentSpec
 
         async def mock_astream(state, config=None, stream_mode=None):
             yield (MagicMock(content="Hello"), {})
@@ -102,14 +102,14 @@ class TestProductionAgent:
 
 class TestRegistry:
     def test_get_default_agent_returns_production_agent(self):
-        from app.agent.factory import ProductionAgent
-        from app.agent.registry import get_default_agent
+        from src.agent.factory import ProductionAgent
+        from src.agent.registry import get_default_agent
 
         agent = get_default_agent()
         assert isinstance(agent, ProductionAgent)
 
     def test_get_default_agent_is_stable(self):
-        from app.agent.registry import get_default_agent
+        from src.agent.registry import get_default_agent
 
         agent1 = get_default_agent()
         agent2 = get_default_agent()

@@ -5,8 +5,8 @@ from unittest.mock import MagicMock, patch
 
 class TestAgentRegistry:
     def test_register_and_get(self):
-        from app.agent.registry import AgentRegistry
-        from app.agent.spec import AgentSpec
+        from src.agent.registry import AgentRegistry
+        from src.agent.spec import AgentSpec
 
         reg = AgentRegistry()
         spec = AgentSpec(name="researcher")
@@ -19,7 +19,7 @@ class TestAgentRegistry:
         assert reg.get("researcher") is mock_agent
 
     def test_get_unknown_raises(self):
-        from app.agent.registry import AgentRegistry
+        from src.agent.registry import AgentRegistry
 
         reg = AgentRegistry()
         import pytest
@@ -28,8 +28,8 @@ class TestAgentRegistry:
             reg.get("nonexistent")
 
     def test_all_returns_all_agents(self):
-        from app.agent.registry import AgentRegistry
-        from app.agent.spec import AgentSpec
+        from src.agent.registry import AgentRegistry
+        from src.agent.spec import AgentSpec
 
         reg = AgentRegistry()
 
@@ -41,8 +41,8 @@ class TestAgentRegistry:
         assert len(reg.all()) == 2
 
     def test_names_returns_registered_names(self):
-        from app.agent.registry import AgentRegistry
-        from app.agent.spec import AgentSpec
+        from src.agent.registry import AgentRegistry
+        from src.agent.spec import AgentSpec
 
         reg = AgentRegistry()
 
@@ -53,8 +53,8 @@ class TestAgentRegistry:
         assert "alpha" in reg.names()
 
     def test_register_overwrites_existing(self):
-        from app.agent.registry import AgentRegistry
-        from app.agent.spec import AgentSpec
+        from src.agent.registry import AgentRegistry
+        from src.agent.spec import AgentSpec
 
         reg = AgentRegistry()
         agent_v1 = MagicMock()
@@ -70,12 +70,12 @@ class TestAgentRegistry:
 
 class TestGlobalRegistry:
     def test_global_registry_has_default_agent(self):
-        from app.agent.registry import global_registry
+        from src.agent.registry import global_registry
 
         assert "default" in global_registry.names()
 
     def test_get_default_agent_returns_same_instance(self):
-        from app.agent.registry import get_default_agent, global_registry
+        from src.agent.registry import get_default_agent, global_registry
 
         agent = get_default_agent()
         assert agent is global_registry.get("default")
@@ -85,7 +85,7 @@ class TestRegistryEndpoints:
     async def test_list_agents_endpoint(self):
         from fastapi.testclient import TestClient
 
-        from app.main import app
+        from src.main import app
 
         with TestClient(app) as client:
             resp = client.get("/agents")
@@ -98,7 +98,7 @@ class TestRegistryEndpoints:
     async def test_register_agent_endpoint(self):
         from fastapi.testclient import TestClient
 
-        from app.main import app
+        from src.main import app
 
         with TestClient(app) as client:
             resp = client.post(

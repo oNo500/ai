@@ -7,7 +7,7 @@ from langchain_core.messages import AIMessage, HumanMessage
 
 class TestAfterReflect:
     def test_routes_to_model_when_critique_requests_revision(self):
-        from app.agent.reflection import after_reflect
+        from src.agent.reflection import after_reflect
 
         state = {
             "messages": [HumanMessage(content="hi"), AIMessage(content="bad answer")],
@@ -20,7 +20,7 @@ class TestAfterReflect:
         assert result == "model"
 
     def test_routes_to_end_when_critique_accepts(self):
-        from app.agent.reflection import after_reflect
+        from src.agent.reflection import after_reflect
 
         state = {
             "messages": [HumanMessage(content="hi"), AIMessage(content="good answer")],
@@ -33,7 +33,7 @@ class TestAfterReflect:
         assert result == "__end__"
 
     def test_routes_to_end_when_max_reflections_reached(self):
-        from app.agent.reflection import after_reflect
+        from src.agent.reflection import after_reflect
 
         state = {
             "messages": [HumanMessage(content="hi"), AIMessage(content="answer")],
@@ -48,7 +48,7 @@ class TestAfterReflect:
 
 class TestReflectNode:
     async def test_reflect_node_increments_reflection_count(self):
-        from app.agent.reflection import make_node_reflect
+        from src.agent.reflection import make_node_reflect
 
         mock_llm = MagicMock()
         mock_llm.ainvoke = AsyncMock(
@@ -67,7 +67,7 @@ class TestReflectNode:
         assert result["reflection_count"] == 1
 
     async def test_reflect_node_appends_critique_to_messages(self):
-        from app.agent.reflection import make_node_reflect
+        from src.agent.reflection import make_node_reflect
 
         mock_llm = MagicMock()
         mock_llm.ainvoke = AsyncMock(
@@ -87,7 +87,7 @@ class TestReflectNode:
         assert "REVISE" in result["messages"][0].content
 
     async def test_reflect_node_calls_llm_with_critique_prompt(self):
-        from app.agent.reflection import make_node_reflect
+        from src.agent.reflection import make_node_reflect
 
         mock_llm = MagicMock()
         mock_llm.ainvoke = AsyncMock(
@@ -111,14 +111,14 @@ class TestReflectNode:
 
 class TestAgentSpecReflection:
     def test_spec_has_enable_reflection_field(self):
-        from app.agent.spec import AgentSpec
+        from src.agent.spec import AgentSpec
 
         spec = AgentSpec(name="test", enable_reflection=True, max_reflections=3)
         assert spec.enable_reflection is True
         assert spec.max_reflections == 3
 
     def test_spec_reflection_defaults(self):
-        from app.agent.spec import AgentSpec
+        from src.agent.spec import AgentSpec
 
         spec = AgentSpec(name="test")
         assert spec.enable_reflection is False
@@ -127,7 +127,7 @@ class TestAgentSpecReflection:
 
 class TestAgentStateReflectionCount:
     def test_state_has_reflection_count_field(self):
-        from app.agent.state import AgentState
+        from src.agent.state import AgentState
 
         state: AgentState = {
             "messages": [],
@@ -142,8 +142,8 @@ class TestBuildGraphWithReflection:
     def test_graph_includes_reflect_node_when_enabled(self):
         from unittest.mock import MagicMock
 
-        from app.agent.graph import build_graph
-        from app.agent.spec import AgentSpec
+        from src.agent.graph import build_graph
+        from src.agent.spec import AgentSpec
 
         mock_llm = MagicMock()
         spec = AgentSpec(name="test", enable_reflection=True)
@@ -154,8 +154,8 @@ class TestBuildGraphWithReflection:
     def test_graph_excludes_reflect_node_when_disabled(self):
         from unittest.mock import MagicMock
 
-        from app.agent.graph import build_graph
-        from app.agent.spec import AgentSpec
+        from src.agent.graph import build_graph
+        from src.agent.spec import AgentSpec
 
         mock_llm = MagicMock()
         spec = AgentSpec(name="test", enable_reflection=False)

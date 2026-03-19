@@ -5,7 +5,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 class TestRateLimiter:
     async def test_allows_request_under_limit(self):
-        from app.middleware.ratelimit import RateLimiter
+        from src.middleware.ratelimit import RateLimiter
 
         mock_redis = AsyncMock()
         mock_redis.incr = AsyncMock(return_value=1)
@@ -18,7 +18,7 @@ class TestRateLimiter:
         assert count == 1
 
     async def test_blocks_request_over_limit(self):
-        from app.middleware.ratelimit import RateLimiter
+        from src.middleware.ratelimit import RateLimiter
 
         mock_redis = AsyncMock()
         mock_redis.incr = AsyncMock(return_value=11)
@@ -31,7 +31,7 @@ class TestRateLimiter:
         assert count == 11
 
     async def test_uses_user_id_as_redis_key(self):
-        from app.middleware.ratelimit import RateLimiter
+        from src.middleware.ratelimit import RateLimiter
 
         mock_redis = AsyncMock()
         mock_redis.incr = AsyncMock(return_value=1)
@@ -44,7 +44,7 @@ class TestRateLimiter:
         assert "alice" in call_args
 
     async def test_sets_expiry_on_first_request(self):
-        from app.middleware.ratelimit import RateLimiter
+        from src.middleware.ratelimit import RateLimiter
 
         mock_redis = AsyncMock()
         mock_redis.incr = AsyncMock(return_value=1)
@@ -56,7 +56,7 @@ class TestRateLimiter:
         mock_redis.expire.assert_called_once()
 
     async def test_sets_expiry_on_every_request(self):
-        from app.middleware.ratelimit import RateLimiter
+        from src.middleware.ratelimit import RateLimiter
 
         mock_redis = AsyncMock()
         mock_redis.incr = AsyncMock(return_value=5)  # not first request
@@ -70,7 +70,7 @@ class TestRateLimiter:
 
 class TestSettingsRateLimit:
     def test_settings_has_rate_limit_fields(self):
-        from app.settings import Settings
+        from src.settings import Settings
 
         s = Settings()
         assert hasattr(s, "rate_limit_requests")
@@ -83,7 +83,7 @@ class TestRateLimitEndpoint:
     async def test_invoke_returns_429_when_rate_limited(self):
         from fastapi.testclient import TestClient
 
-        from app.main import app
+        from src.main import app
 
         with patch("app.api.routes.check_rate_limit") as mock_check:
             mock_check.return_value = (False, 61)
@@ -99,7 +99,7 @@ class TestRateLimitEndpoint:
     async def test_invoke_proceeds_when_under_limit(self):
         from fastapi.testclient import TestClient
 
-        from app.main import app
+        from src.main import app
 
         mock_agent = MagicMock()
         mock_agent.ainvoke = AsyncMock(

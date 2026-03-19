@@ -5,7 +5,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 class TestVectorStore:
     async def test_search_returns_list_of_strings(self):
-        from app.agent.tools.rag import VectorStore
+        from src.agent.tools.rag import VectorStore
 
         mock_store = MagicMock()
         mock_store.asimilarity_search = AsyncMock(
@@ -22,7 +22,7 @@ class TestVectorStore:
         assert results == ["chunk A", "chunk B"]
 
     async def test_ingest_calls_add_documents(self):
-        from app.agent.tools.rag import VectorStore
+        from src.agent.tools.rag import VectorStore
 
         mock_store = MagicMock()
         mock_store.aadd_texts = AsyncMock(return_value=["id1", "id2"])
@@ -35,7 +35,7 @@ class TestVectorStore:
         assert ids == ["id1", "id2"]
 
     def test_vector_store_init_uses_settings(self):
-        from app.agent.tools.rag import VectorStore
+        from src.agent.tools.rag import VectorStore
 
         mock_pg_store = MagicMock()
 
@@ -52,7 +52,7 @@ class TestVectorStore:
 
 class TestRagSearchTool:
     async def test_rag_search_tool_calls_vector_store(self):
-        from app.agent.tools.rag import make_rag_search_tool
+        from src.agent.tools.rag import make_rag_search_tool
 
         mock_vs = MagicMock()
         mock_vs.search = AsyncMock(return_value=["result one", "result two"])
@@ -65,7 +65,7 @@ class TestRagSearchTool:
         assert "result two" in result
 
     def test_rag_search_tool_has_correct_name(self):
-        from app.agent.tools.rag import make_rag_search_tool
+        from src.agent.tools.rag import make_rag_search_tool
 
         mock_vs = MagicMock()
         tool = make_rag_search_tool(mock_vs)
@@ -74,13 +74,13 @@ class TestRagSearchTool:
 
 class TestSettingsRag:
     def test_settings_has_postgres_url(self):
-        from app.settings import Settings
+        from src.settings import Settings
 
         s = Settings()
         assert hasattr(s, "postgres_url")
 
     def test_settings_has_rag_collection(self):
-        from app.settings import Settings
+        from src.settings import Settings
 
         s = Settings()
         assert hasattr(s, "rag_collection")
@@ -93,7 +93,7 @@ class TestIngestEndpoint:
 
         from fastapi.testclient import TestClient
 
-        from app.main import app
+        from src.main import app
 
         mock_vs = MagicMock()
         mock_vs.ingest = AsyncMock(return_value=["id1", "id2"])

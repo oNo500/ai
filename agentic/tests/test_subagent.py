@@ -5,7 +5,7 @@ from unittest.mock import AsyncMock, MagicMock
 
 class TestMakeSubagentTool:
     def test_tool_name_equals_agent_name(self):
-        from app.agent.tools.subagent import make_subagent_tool
+        from src.agent.tools.subagent import make_subagent_tool
 
         mock_agent = MagicMock()
         mock_agent.spec.name = "researcher"
@@ -15,7 +15,7 @@ class TestMakeSubagentTool:
         assert tool.name == "researcher"
 
     def test_tool_description_uses_system_prompt(self):
-        from app.agent.tools.subagent import make_subagent_tool
+        from src.agent.tools.subagent import make_subagent_tool
 
         mock_agent = MagicMock()
         mock_agent.spec.name = "coder"
@@ -25,7 +25,7 @@ class TestMakeSubagentTool:
         assert "Python expert" in tool.description
 
     def test_tool_description_fallback_when_no_system_prompt(self):
-        from app.agent.tools.subagent import make_subagent_tool
+        from src.agent.tools.subagent import make_subagent_tool
 
         mock_agent = MagicMock()
         mock_agent.spec.name = "helper"
@@ -35,7 +35,7 @@ class TestMakeSubagentTool:
         assert "helper" in tool.description
 
     async def test_tool_arun_calls_agent_ainvoke(self):
-        from app.agent.tools.subagent import make_subagent_tool
+        from src.agent.tools.subagent import make_subagent_tool
 
         mock_agent = MagicMock()
         mock_agent.spec.name = "analyst"
@@ -53,7 +53,7 @@ class TestMakeSubagentTool:
         assert "analysis result" in result
 
     async def test_tool_arun_passes_thread_id(self):
-        from app.agent.tools.subagent import make_subagent_tool
+        from src.agent.tools.subagent import make_subagent_tool
 
         mock_agent = MagicMock()
         mock_agent.spec.name = "bot"
@@ -74,7 +74,7 @@ class TestSubagentToolRun:
     def test_sync_run_raises_not_implemented(self):
         import pytest
 
-        from app.agent.tools.subagent import make_subagent_tool
+        from src.agent.tools.subagent import make_subagent_tool
 
         mock_agent = MagicMock()
         mock_agent.spec.name = "bot"
@@ -87,7 +87,7 @@ class TestSubagentToolRun:
 
 class TestSubagentToolFromRegistry:
     def test_make_subagent_tool_from_registry(self):
-        from app.agent.tools.subagent import make_subagent_tool_from_registry
+        from src.agent.tools.subagent import make_subagent_tool_from_registry
 
         mock_agent = MagicMock()
         mock_agent.spec.name = "researcher"
@@ -103,7 +103,7 @@ class TestSubagentToolFromRegistry:
     def test_unknown_agent_raises(self):
         import pytest
 
-        from app.agent.tools.subagent import make_subagent_tool_from_registry
+        from src.agent.tools.subagent import make_subagent_tool_from_registry
 
         mock_registry = MagicMock()
         mock_registry.get.side_effect = KeyError("ghost")

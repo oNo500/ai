@@ -8,7 +8,7 @@ from langchain_core.tools import tool
 from langchain_openai import OpenAIEmbeddings
 from langchain_postgres import PGVector
 
-from app.settings import get_settings
+from src.settings import get_settings
 
 if TYPE_CHECKING:
     from langchain_core.tools import BaseTool

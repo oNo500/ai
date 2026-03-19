@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 from fastmcp import FastMCP
 from langchain_core.messages import HumanMessage
 
-from app.agent.graph import agent_graph
+from src.agent.graph import agent_graph
 
 load_dotenv()
 
