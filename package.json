@@ -1,0 +1,38 @@
+{
+  "name": "boilerplate",
+  "type": "module",
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "lint:fix": "turbo run lint:fix",
+    "typecheck": "turbo run typecheck",
+    "up:all": "taze -r",
+    "setup:env": "cp .env.example .env && pnpm --filter api --filter admin-antd --filter admin-shadcn --filter @workspace/database exec cp .env.example .env"
+  },
+  "devDependencies": {
+    "taze": "^19.10.0",
+    "turbo": "^2.8.14"
+  },
+  "packageManager": "pnpm@10.31.0",
+  "pnpm": {
+    "peerDependencyRules": {
+      "allowAny": [
+        "antd",
+        "openapi-fetch",
+        "storybook"
+      ]
+    },
+    "onlyBuiltDependencies": [
+      "@nestjs/core",
+      "@scarf/scarf",
+      "bcrypt",
+      "better-sqlite3",
+      "@swc/core",
+      "esbuild"
+    ]
+  },
+  "dependencies": {
+    "eslint-config-prettier": "^10.1.8"
+  }
+}

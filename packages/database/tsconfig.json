@@ -1,0 +1,7 @@
+{
+  "extends": "@infra-x/typescript-config/tsconfig.library.json",
+  "compilerOptions": {
+    "isolatedDeclarations": false
+  },
+  "include": ["src/**/*","*.config.mts","*.config.ts","scripts/**/*"]
+}

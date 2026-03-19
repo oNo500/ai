@@ -1,0 +1,9 @@
+{
+  "extends": "@infra-x/typescript-config/tsconfig.nestjs.json",
+  "compilerOptions": {
+    "baseUrl": "./",
+    "paths": { "@/*": ["src/*"] }
+  },
+  "include": ["src/**/*", "scripts/seed.ts"],
+  "exclude": ["**/*.test.ts", "**/*.spec.ts", "**/__tests__/**/*"]
+}

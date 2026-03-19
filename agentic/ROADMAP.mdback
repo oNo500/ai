@@ -1,0 +1,14 @@
+
+1. 熟悉 python 基本语法
+2. 熟悉 LLM 基本理念和架构
+
+## 核心原则
+
+最好是“无状态”的，或者拥有自己独立的轻量级存储（如另一个独立的 PostgreSQL Schema，或者直接用 Redis 存中间态）。Python 端只负责计算，算完把结果打包扔回给 其他业务管理服务，如java/nestjs/nextjs即可
+
+## 参考
+1. 能力参考：https://github.com/NirDiamant/agents-towards-production
+2. 架构参考：https://github.com/Harmeet10000/AgentNexus-LangChain-FastAPI
+
+
+## github ci
