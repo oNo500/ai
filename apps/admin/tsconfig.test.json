@@ -8,5 +8,5 @@
       "@workspace/ui/*": ["../../packages/ui/src/*"]
     }
   },
-  "include": ["__tests__/**/*", "src/**/*.test.{ts,tsx}"]
+  "include": ["__tests__/**/*", "src/**/*.test.ts", "src/**/*.test.tsx"]
 }

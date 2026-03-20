@@ -6,7 +6,7 @@ import {
   timestamp,
 } from 'drizzle-orm/pg-core'
 
-import { usersTable } from './users.schema'
+import { usersTable } from '../identity/users.schema'
 
 export const loginStatusEnum = pgEnum('login_status', ['success', 'failed'])
 

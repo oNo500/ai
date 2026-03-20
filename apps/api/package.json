@@ -61,6 +61,7 @@
   },
   "devDependencies": {
     "@golevelup/ts-vitest": "^2.2.0",
+    "@infra-x/eslint-config": "^0.1.12",
     "@infra-x/typescript-config": "latest",
     "@nestjs/cli": "^11.0.16",
     "@nestjs/schematics": "^11.0.9",

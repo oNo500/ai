@@ -45,7 +45,7 @@ export function useAgentChat() {
     try {
       const res = await fetch(`${env.NEXT_PUBLIC_API_URL}/api/agent/stream`, {
         method: 'POST',
-        headers: { 'content-type': 'application/json', accept: 'text/event-stream' },
+        headers: { 'content-type': 'application/json', 'accept': 'text/event-stream' },
         body: JSON.stringify({ message: text, sessionId }),
         signal: abortRef.current.signal,
       })
@@ -101,8 +101,8 @@ export function useAgentChat() {
           }
         }
       }
-    } catch (err) {
-      if ((err as Error).name !== 'AbortError') {
+    } catch (error) {
+      if ((error as Error).name !== 'AbortError') {
         setMessages((prev) =>
           prev.map((m) =>
             m.id === assistantId ? { ...m, content: '[Error: failed to connect to agent]' } : m,

@@ -1,9 +1,8 @@
 'use client'
 
-import { useRef, useState } from 'react'
-
 import { Button } from '@workspace/ui/components/button'
 import { Input } from '@workspace/ui/components/input'
+import { useRef, useState } from 'react'
 
 import { MessageList } from '@/features/chat/components/message-list'
 import { ToolCallIndicator } from '@/features/chat/components/tool-call-indicator'
@@ -35,15 +34,17 @@ export function ChatWindow() {
           disabled={isLoading}
           className="flex-1"
         />
-        {isLoading ? (
-          <Button type="button" variant="outline" onClick={stop}>
-            Stop
-          </Button>
-        ) : (
-          <Button type="submit" disabled={!input.trim()}>
-            Send
-          </Button>
-        )}
+        {isLoading
+          ? (
+              <Button type="button" variant="outline" onClick={stop}>
+                Stop
+              </Button>
+            )
+          : (
+              <Button type="submit" disabled={!input.trim()}>
+                Send
+              </Button>
+            )}
       </form>
     </div>
   )

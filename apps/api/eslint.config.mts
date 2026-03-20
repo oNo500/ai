@@ -1,4 +1,4 @@
-import { GLOB_TESTS, composeConfig } from '@workspace/eslint-config'
+import { GLOB_TESTS, composeConfig } from '@infra-x/eslint-config'
 import { defineConfig } from 'eslint/config'
 
 const API_TEST_FILES = [
@@ -11,7 +11,6 @@ const baseConfig = composeConfig({
   typescript: {
     tsconfigRootDir: import.meta.dirname,
   },
-  prettier: false,
   packageJson: {
     overrides: {
       'package-json/valid-devDependencies': 'off', // allow link: local dependencies
@@ -82,8 +81,7 @@ const baseConfig = composeConfig({
       'unicorn/no-null': 'off', // Drizzle returns null; keep consistent
     },
   },
-  // Import rules: default configuration (forbidding ../ parent-relative imports is enabled in the imports config)
-  imports: {},
+  imports: true,
 })
 
 const vitestConfig = defineConfig({
@@ -95,14 +93,6 @@ const vitestConfig = defineConfig({
     stylistic: false,
     depend: false,
   }),
-})
-
-// Schema file exception: Drizzle Kit does not support path aliases, so relative imports must be used
-const schemaException = defineConfig({
-  files: ['**/schemas/*.schema.ts'],
-  rules: {
-    'no-restricted-imports': 'off',
-  },
 })
 
 // Allow the auth module to depend on the profile and audit-log modules
@@ -131,4 +121,4 @@ const authBoundaryException = defineConfig({
   },
 })
 
-export default [...baseConfig, ...vitestConfig, ...schemaException, ...authBoundaryException]
+export default [...baseConfig, ...vitestConfig, ...authBoundaryException]
