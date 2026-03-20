@@ -11,7 +11,7 @@ class TestAgentRegistry:
         reg = AgentRegistry()
         spec = AgentSpec(name="researcher")
 
-        with patch("app.agent.registry.create_production_agent") as mock_create:
+        with patch("src.agent.registry.create_production_agent") as mock_create:
             mock_agent = MagicMock()
             mock_create.return_value = mock_agent
             reg.register("researcher", spec)
@@ -33,7 +33,7 @@ class TestAgentRegistry:
 
         reg = AgentRegistry()
 
-        with patch("app.agent.registry.create_production_agent") as mock_create:
+        with patch("src.agent.registry.create_production_agent") as mock_create:
             mock_create.side_effect = [MagicMock(), MagicMock()]
             reg.register("a", AgentSpec(name="a"))
             reg.register("b", AgentSpec(name="b"))
@@ -46,7 +46,7 @@ class TestAgentRegistry:
 
         reg = AgentRegistry()
 
-        with patch("app.agent.registry.create_production_agent") as mock_create:
+        with patch("src.agent.registry.create_production_agent") as mock_create:
             mock_create.return_value = MagicMock()
             reg.register("alpha", AgentSpec(name="alpha"))
 
@@ -60,7 +60,7 @@ class TestAgentRegistry:
         agent_v1 = MagicMock()
         agent_v2 = MagicMock()
 
-        with patch("app.agent.registry.create_production_agent") as mock_create:
+        with patch("src.agent.registry.create_production_agent") as mock_create:
             mock_create.side_effect = [agent_v1, agent_v2]
             reg.register("bot", AgentSpec(name="bot"))
             reg.register("bot", AgentSpec(name="bot"))

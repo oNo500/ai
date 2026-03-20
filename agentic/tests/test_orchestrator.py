@@ -34,7 +34,7 @@ class TestOrchestratorTools:
         worker_b.spec.system_prompt = "You write code."
         worker_b.spec.role = "worker"
 
-        with patch("app.agent.registry.create_production_agent") as mock_create:
+        with patch("src.agent.registry.create_production_agent") as mock_create:
             mock_create.side_effect = [worker_a, worker_b]
             reg.register("researcher", AgentSpec(name="researcher", role="worker"))
             reg.register("coder", AgentSpec(name="coder", role="worker"))
@@ -60,7 +60,7 @@ class TestOrchestratorTools:
         orchestrator.spec.name = "boss"
         orchestrator.spec.role = "orchestrator"
 
-        with patch("app.agent.registry.create_production_agent") as mock_create:
+        with patch("src.agent.registry.create_production_agent") as mock_create:
             mock_create.side_effect = [worker, orchestrator]
             reg.register("helper", AgentSpec(name="helper", role="worker"))
             reg.register("boss", AgentSpec(name="boss", role="orchestrator"))
@@ -82,7 +82,7 @@ class TestOrchestrateEndpoint:
             return_value={"messages": [MagicMock(content="task done")]}
         )
 
-        with patch("app.api.routes.global_registry") as mock_reg:
+        with patch("src.api.routes.global_registry") as mock_reg:
             mock_reg.get.return_value = mock_agent
             mock_reg.names.return_value = ["default", "orchestrator"]
 

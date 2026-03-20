@@ -85,7 +85,7 @@ class TestRateLimitEndpoint:
 
         from src.main import app
 
-        with patch("app.api.routes.check_rate_limit") as mock_check:
+        with patch("src.api.routes.check_rate_limit") as mock_check:
             mock_check.return_value = (False, 61)
 
             with TestClient(app) as client:
@@ -107,8 +107,8 @@ class TestRateLimitEndpoint:
         )
 
         with (
-            patch("app.api.routes.check_rate_limit") as mock_check,
-            patch("app.api.routes.get_default_agent", return_value=mock_agent),
+            patch("src.api.routes.check_rate_limit") as mock_check,
+            patch("src.api.routes.get_default_agent", return_value=mock_agent),
         ):
             mock_check.return_value = (True, 1)
 

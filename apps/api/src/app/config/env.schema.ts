@@ -126,6 +126,9 @@ export const envSchema = z.object({
     .transform((value) => Number.parseInt(value, 10))
     .refine((value) => value > 0, { message: 'THROTTLE_LIMIT must be greater than 0' }),
 
+  // Agentic service URL
+  AGENTIC_URL: z.url().default('http://localhost:8000'),
+
 })
 
 /**

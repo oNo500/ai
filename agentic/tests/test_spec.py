@@ -43,11 +43,11 @@ class TestProductionAgent:
         mock_tool.name = "test_tool"
         spec = AgentSpec(name="test", tools=[mock_tool])
 
-        with patch("app.agent.factory.build_graph") as mock_build:
+        with patch("src.agent.factory.build_graph") as mock_build:
             mock_compiled = MagicMock()
             mock_build.return_value = mock_compiled
 
-            with patch("app.agent.factory.ChatOpenAI") as mock_llm_cls:
+            with patch("src.agent.factory.ChatOpenAI") as mock_llm_cls:
                 mock_llm = MagicMock()
                 mock_llm.bind_tools.return_value = mock_llm
                 mock_llm_cls.return_value = mock_llm

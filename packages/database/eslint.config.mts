@@ -7,6 +7,9 @@ const config: Linter.Config[] = [
     typescript: {
       tsconfigRootDir: import.meta.dirname,
     },
+    depend:{
+      allowed: ['dotenv'],
+    }
   }),
   {
     files: ['scripts/**/*.ts'],

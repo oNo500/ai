@@ -11,7 +11,7 @@ class TestBuildGraphHITL:
         mock_llm = MagicMock()
         spec = AgentSpec(name="test", enable_human_loop=True)
 
-        with patch("app.agent.graph.StateGraph") as mock_sg:
+        with patch("src.agent.graph.StateGraph") as mock_sg:
             mock_builder = MagicMock()
             mock_compiled = MagicMock()
             mock_sg.return_value = mock_builder
@@ -29,7 +29,7 @@ class TestBuildGraphHITL:
         mock_llm = MagicMock()
         spec = AgentSpec(name="test", enable_human_loop=False)
 
-        with patch("app.agent.graph.StateGraph") as mock_sg:
+        with patch("src.agent.graph.StateGraph") as mock_sg:
             mock_builder = MagicMock()
             mock_compiled = MagicMock()
             mock_sg.return_value = mock_builder
@@ -61,7 +61,7 @@ class TestPendingEndpoint:
             )
         )
 
-        with patch("app.api.routes.global_registry") as mock_reg:
+        with patch("src.api.routes.global_registry") as mock_reg:
             mock_reg.get.return_value = mock_agent
             mock_reg.names.return_value = ["default"]
 
@@ -87,7 +87,7 @@ class TestPendingEndpoint:
             return_value=MagicMock(next=(), values={"messages": []})
         )
 
-        with patch("app.api.routes.global_registry") as mock_reg:
+        with patch("src.api.routes.global_registry") as mock_reg:
             mock_reg.get.return_value = mock_agent
             mock_reg.names.return_value = ["default"]
 
@@ -112,7 +112,7 @@ class TestApproveEndpoint:
             return_value={"messages": [MagicMock(content="done after approval")]}
         )
 
-        with patch("app.api.routes.global_registry") as mock_reg:
+        with patch("src.api.routes.global_registry") as mock_reg:
             mock_reg.get.return_value = mock_agent
             mock_reg.names.return_value = ["default"]
 
@@ -135,7 +135,7 @@ class TestApproveEndpoint:
             return_value={"messages": [MagicMock(content="resumed")]}
         )
 
-        with patch("app.api.routes.global_registry") as mock_reg:
+        with patch("src.api.routes.global_registry") as mock_reg:
             mock_reg.get.return_value = mock_agent
             mock_reg.names.return_value = ["default"]
 
@@ -170,7 +170,7 @@ class TestRejectEndpoint:
             return_value={"messages": [MagicMock(content="final answer without tool")]}
         )
 
-        with patch("app.api.routes.global_registry") as mock_reg:
+        with patch("src.api.routes.global_registry") as mock_reg:
             mock_reg.get.return_value = mock_agent
             mock_reg.names.return_value = ["default"]
 
@@ -203,7 +203,7 @@ class TestRejectEndpoint:
             return_value={"messages": [MagicMock(content="ok")]}
         )
 
-        with patch("app.api.routes.global_registry") as mock_reg:
+        with patch("src.api.routes.global_registry") as mock_reg:
             mock_reg.get.return_value = mock_agent
             mock_reg.names.return_value = ["default"]
 
@@ -236,7 +236,7 @@ class TestRejectEndpoint:
             return_value={"messages": [MagicMock(content="ok")]}
         )
 
-        with patch("app.api.routes.global_registry") as mock_reg:
+        with patch("src.api.routes.global_registry") as mock_reg:
             mock_reg.get.return_value = mock_agent
             mock_reg.names.return_value = ["default"]
 
@@ -271,7 +271,7 @@ class TestRejectEndpoint:
             return_value={"messages": [MagicMock(content="ok")]}
         )
 
-        with patch("app.api.routes.global_registry") as mock_reg:
+        with patch("src.api.routes.global_registry") as mock_reg:
             mock_reg.get.return_value = mock_agent
             mock_reg.names.return_value = ["default"]
 

@@ -10,7 +10,7 @@ class TestLifespan:
         mock_redis.ping = AsyncMock(return_value=True)
         mock_redis.aclose = AsyncMock()
 
-        with patch("app.main.aioredis") as mock_aioredis:
+        with patch("src.main.aioredis") as mock_aioredis:
             mock_aioredis.from_url.return_value = mock_redis
 
             from fastapi.testclient import TestClient
@@ -25,7 +25,7 @@ class TestLifespan:
         mock_redis.ping = AsyncMock(return_value=True)
         mock_redis.aclose = AsyncMock()
 
-        with patch("app.main.aioredis") as mock_aioredis:
+        with patch("src.main.aioredis") as mock_aioredis:
             mock_aioredis.from_url.return_value = mock_redis
 
             from fastapi.testclient import TestClient
@@ -52,8 +52,8 @@ class TestLangSmithLifespan:
         mock_settings.langsmith_project = "test-project"
 
         with (
-            patch("app.main.aioredis") as mock_aioredis,
-            patch("app.main.settings", mock_settings),
+            patch("src.main.aioredis") as mock_aioredis,
+            patch("src.main.settings", mock_settings),
             patch.dict(os.environ, {}, clear=False),
         ):
             mock_aioredis.from_url.return_value = mock_redis
@@ -75,7 +75,7 @@ class TestLangSmithLifespan:
         for key in ("LANGCHAIN_TRACING_V2", "LANGCHAIN_API_KEY", "LANGCHAIN_PROJECT"):
             os.environ.pop(key, None)
 
-        with patch("app.main.aioredis") as mock_aioredis:
+        with patch("src.main.aioredis") as mock_aioredis:
             mock_aioredis.from_url.return_value = mock_redis
 
             from fastapi.testclient import TestClient

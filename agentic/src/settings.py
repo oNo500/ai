@@ -1,14 +1,19 @@
 """Application settings using pydantic-settings."""
 
+import os
 from functools import lru_cache
 from typing import Any
 
+from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+_ROOT_ENV = os.path.join(os.path.dirname(__file__), "..", "..", ".env")
+_LOCAL_ENV = os.path.join(os.path.dirname(__file__), "..", ".env")
 
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
-        env_file=".env",
+        env_file=[_ROOT_ENV, _LOCAL_ENV],
         env_file_encoding="utf-8",
         case_sensitive=False,
         extra="ignore",
@@ -25,8 +30,18 @@ class Settings(BaseSettings):
     # Rate limiting
     rate_limit_requests: int = 60
     rate_limit_window_seconds: int = 60
-    # RAG / pgvector
-    postgres_url: str = "postgresql+psycopg://postgres:postgres@localhost:5432/agentic"
+    # RAG / pgvector — reads DATABASE_URL from root .env, accepts postgres:// or postgresql+psycopg://
+    postgres_url: str = Field(
+        default="postgresql+psycopg://postgres:postgres@localhost:5432/agentic",
+        validation_alias="DATABASE_URL",
+    )
+
+    @field_validator("postgres_url", mode="before")
+    @classmethod
+    def normalize_postgres_scheme(cls, v: str) -> str:
+        if isinstance(v, str) and v.startswith("postgres://"):
+            return v.replace("postgres://", "postgresql+psycopg://", 1)
+        return v
     rag_collection: str = "rag_documents"
     # Mem0 long-term memory backend
     mem0_vector_store_provider: str = "memory"  # "memory" | "qdrant"

@@ -17,6 +17,7 @@ import { RequestContextInterceptor } from '@/app/interceptors/request-context.in
 import { TraceContextInterceptor } from '@/app/interceptors/trace-context.interceptor'
 import { LoggerModule } from '@/app/logger/logger.module'
 import { ETagMiddleware } from '@/app/middleware/etag.middleware'
+import { AgentModule } from '@/modules/agent/agent.module'
 import { AnalyticsModule } from '@/modules/analytics/analytics.module'
 import { ArticleModule } from '@/modules/article/article.module'
 import { AuditLogInterceptor } from '@/modules/audit-log/audit-log.interceptor'
@@ -48,6 +49,7 @@ import type { NestModule, MiddlewareConsumer } from '@nestjs/common'
     // Config module: global environment variable management
     ConfigModule.forRoot({
       isGlobal: true, // make ConfigService available throughout the application
+      envFilePath: ['../../.env', '.env'], // root shared vars, then local overrides
       validate: validateEnv, // validate environment variables with Zod
       cache: true, // cache environment variables for improved performance
     }),
@@ -93,6 +95,7 @@ import type { NestModule, MiddlewareConsumer } from '@nestjs/common'
     ScheduledTasksModule, // Scheduled tasks (cron, interval, timeout examples)
     UploadModule, // File upload (Multer + local storage)
     AnalyticsModule, // Analytics dashboard data endpoints
+    AgentModule, // Agent module (AG-UI SSE proxy)
   ],
   providers: [
     // Global rate-limiting guard

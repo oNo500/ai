@@ -1,5 +1,19 @@
 import json
+import uuid
 
+from ag_ui.core import (
+    EventType,
+    RunErrorEvent,
+    RunFinishedEvent,
+    RunStartedEvent,
+    TextMessageContentEvent,
+    TextMessageEndEvent,
+    TextMessageStartEvent,
+    ToolCallArgsEvent,
+    ToolCallEndEvent,
+    ToolCallStartEvent,
+)
+from ag_ui.encoder import EventEncoder
 from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
@@ -95,6 +109,75 @@ async def stream(request: InvokeRequest):
         yield f"data: {json.dumps({'type': 'done', 'content': ''})}\n\n"
 
     return StreamingResponse(event_generator(), media_type="text/event-stream")
+
+
+@router.post("/stream/agui")
+async def stream_agui(request: InvokeRequest, req: Request):
+    agent = get_default_agent()
+    thread_id = request.session_id or "anonymous"
+    user_id = request.user_id
+    run_id = str(uuid.uuid4())
+    message_id = str(uuid.uuid4())
+    encoder = EventEncoder(accept=req.headers.get("accept"))
+
+    async def event_generator():
+        yield encoder.encode(
+            RunStartedEvent(type=EventType.RUN_STARTED, thread_id=thread_id, run_id=run_id)
+        )
+        yield encoder.encode(
+            TextMessageStartEvent(
+                type=EventType.TEXT_MESSAGE_START, message_id=message_id, role="assistant"
+            )
+        )
+
+        try:
+            async for chunk, _ in agent.astream(
+                request.message, thread_id=thread_id, user_id=user_id
+            ):
+                if hasattr(chunk, "content") and chunk.content:
+                    yield encoder.encode(
+                        TextMessageContentEvent(
+                            type=EventType.TEXT_MESSAGE_CONTENT,
+                            message_id=message_id,
+                            delta=chunk.content,
+                        )
+                    )
+                if hasattr(chunk, "tool_calls") and chunk.tool_calls:
+                    for tc in chunk.tool_calls:
+                        tc_id = tc.get("id") or str(uuid.uuid4())
+                        yield encoder.encode(
+                            ToolCallStartEvent(
+                                type=EventType.TOOL_CALL_START,
+                                tool_call_id=tc_id,
+                                tool_call_name=tc.get("name", ""),
+                                parent_message_id=message_id,
+                            )
+                        )
+                        if tc.get("args"):
+                            yield encoder.encode(
+                                ToolCallArgsEvent(
+                                    type=EventType.TOOL_CALL_ARGS,
+                                    tool_call_id=tc_id,
+                                    delta=json.dumps(tc["args"]),
+                                )
+                            )
+                        yield encoder.encode(
+                            ToolCallEndEvent(
+                                type=EventType.TOOL_CALL_END, tool_call_id=tc_id
+                            )
+                        )
+        except Exception as e:
+            yield encoder.encode(RunErrorEvent(type=EventType.RUN_ERROR, message=str(e)))
+            return
+
+        yield encoder.encode(
+            TextMessageEndEvent(type=EventType.TEXT_MESSAGE_END, message_id=message_id)
+        )
+        yield encoder.encode(
+            RunFinishedEvent(type=EventType.RUN_FINISHED, thread_id=thread_id, run_id=run_id)
+        )
+
+    return StreamingResponse(event_generator(), media_type=encoder.get_content_type())
 
 
 @router.post("/rag/ingest", response_model=IngestResponse)

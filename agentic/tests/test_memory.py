@@ -56,7 +56,7 @@ class TestMemoryManager:
         mock_lt = AsyncMock()
         mock_lt.format_for_prompt = AsyncMock(return_value="## Memory\n- User likes Python")
 
-        with patch("app.agent.memory.LongTermMemory", return_value=mock_lt):
+        with patch("src.agent.memory.LongTermMemory", return_value=mock_lt):
             mgr = MemoryManager(backend="memory", enable_long_term=True)
 
         messages = [HumanMessage(content="hello")]
@@ -70,7 +70,7 @@ class TestMemoryManager:
         mock_lt = AsyncMock()
         mock_lt.add = AsyncMock(return_value=[])
 
-        with patch("app.agent.memory.LongTermMemory", return_value=mock_lt):
+        with patch("src.agent.memory.LongTermMemory", return_value=mock_lt):
             mgr = MemoryManager(backend="memory", enable_long_term=True)
 
         messages = [HumanMessage(content="hi"), AIMessage(content="hello")]
@@ -85,7 +85,7 @@ class TestLongTermMemoryConfig:
         fake_client = object()
         config = {"vector_store": {"provider": "qdrant", "config": {"host": "localhost"}}}
 
-        with patch("app.agent.memory.Memory") as mock_mem_cls:
+        with patch("src.agent.memory.Memory") as mock_mem_cls:
             mock_mem_cls.from_config.return_value = fake_client
             lt = LongTermMemory(mem0_config=config)
 
@@ -97,7 +97,7 @@ class TestLongTermMemoryConfig:
 
         fake_client = object()
 
-        with patch("app.agent.memory.Memory") as mock_mem_cls:
+        with patch("src.agent.memory.Memory") as mock_mem_cls:
             mock_mem_cls.return_value = fake_client
             lt = LongTermMemory(mem0_config=None)
 

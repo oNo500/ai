@@ -40,8 +40,8 @@ class TestVectorStore:
         mock_pg_store = MagicMock()
 
         with (
-            patch("app.agent.tools.rag.PGVector") as mock_pgvector,
-            patch("app.agent.tools.rag.OpenAIEmbeddings"),
+            patch("src.agent.tools.rag.PGVector") as mock_pgvector,
+            patch("src.agent.tools.rag.OpenAIEmbeddings"),
         ):
             mock_pgvector.return_value = mock_pg_store
             vs = VectorStore()
@@ -98,7 +98,7 @@ class TestIngestEndpoint:
         mock_vs = MagicMock()
         mock_vs.ingest = AsyncMock(return_value=["id1", "id2"])
 
-        with patch("app.agent.tools.rag.VectorStore", return_value=mock_vs):
+        with patch("src.agent.tools.rag.VectorStore", return_value=mock_vs):
             with TestClient(app) as client:
                 resp = client.post(
                     "/rag/ingest",
