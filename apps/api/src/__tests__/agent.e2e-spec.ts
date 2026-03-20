@@ -2,6 +2,7 @@ import { createTestApp } from './helpers/create-app'
 import { createRequest } from './helpers/create-request'
 
 import type { INestApplication } from '@nestjs/common'
+import type { MockInstance } from 'vitest'
 
 // Stub global fetch so no real HTTP calls are made in tests
 function makeAgUiSseBody(events: object[]): ReadableStream<Uint8Array> {
@@ -23,14 +24,10 @@ const RUN_FINISHED = { type: 'RUN_FINISHED', threadId: 't1', runId: 'r1' }
 
 describe('agent E2E tests', () => {
   let app: INestApplication
-  let fetchSpy: ReturnType<typeof vi.spyOn>
+  let fetchSpy: MockInstance<typeof fetch>
 
   beforeAll(async () => {
     app = await createTestApp()
-  })
-
-  afterAll(async () => {
-    await app.close()
   })
 
   beforeEach(() => {
@@ -46,7 +43,11 @@ describe('agent E2E tests', () => {
     fetchSpy.mockRestore()
   })
 
-  describe('POST /api/agent/stream', () => {
+  afterAll(async () => {
+    await app.close()
+  })
+
+  describe('pOST /api/agent/stream', () => {
     it('returns 200 with text/event-stream content type', async () => {
       const res = await createRequest(app)
         .post('/api/agent/stream')
@@ -71,14 +72,15 @@ describe('agent E2E tests', () => {
         .post('/api/agent/stream')
         .send({ message: 'Hi', sessionId: 'sess-1', userId: 'user-42' })
 
-      const [, init] = fetchSpy.mock.calls[0]!
-      const body = JSON.parse((init as RequestInit).body as string) as Record<string, unknown>
+      const calls = fetchSpy.mock.calls as [string, RequestInit][]
+      const [, init] = calls[0]!
+      const body = JSON.parse(init.body as string) as Record<string, unknown>
       expect(body.session_id).toBe('sess-1')
       expect(body.user_id).toBe('user-42')
     })
   })
 
-  describe('POST /api/agent/stream/client', () => {
+  describe('pOST /api/agent/stream/client', () => {
     it('returns Vercel AI Stream format', async () => {
       const res = await createRequest(app)
         .post('/api/agent/stream/client')

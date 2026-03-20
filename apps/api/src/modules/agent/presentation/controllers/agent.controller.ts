@@ -1,11 +1,13 @@
+import { EventType, TextMessageContentEventSchema } from '@ag-ui/core'
+import { formatDataStreamPart } from '@ai-sdk/ui-utils'
 import { Body, Controller, HttpCode, HttpStatus, Post, Req, Res } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { ApiOperation, ApiTags } from '@nestjs/swagger'
-import { type Request, type Response } from 'express'
 
 import { AgentInvokeDto } from '@/modules/agent/presentation/dtos/agent-invoke.dto'
 
 import type { Env } from '@/app/config/env.schema'
+import type { Request, Response } from 'express'
 
 /**
  * AgentController — proxies requests to the Python agentic service.
@@ -30,7 +32,7 @@ export class AgentController {
       method: 'POST',
       headers: {
         'content-type': 'application/json',
-        accept: req.headers['accept'] ?? 'text/event-stream',
+        'accept': req.headers.accept ?? 'text/event-stream',
       },
       body: JSON.stringify({
         message: dto.message,
@@ -44,14 +46,14 @@ export class AgentController {
     res.setHeader('Connection', 'keep-alive')
     res.flushHeaders()
 
-    const reader = upstream.body!.getReader()
+    const reader = upstream.body!.getReader() as ReadableStreamDefaultReader<Uint8Array>
     const decoder = new TextDecoder()
 
     try {
-      while (true) {
-        const { done, value } = await reader.read()
-        if (done) break
-        res.write(decoder.decode(value, { stream: true }))
+      for (;;) {
+        const result = await reader.read()
+        if (result.done) break
+        res.write(decoder.decode(result.value, { stream: true }))
       }
     } finally {
       res.end()
@@ -64,7 +66,7 @@ export class AgentController {
   async streamClient(@Body() dto: AgentInvokeDto, @Res() res: Response) {
     const upstream = await fetch(`${this.#agenticUrl}/stream/agui`, {
       method: 'POST',
-      headers: { 'content-type': 'application/json', accept: 'text/event-stream' },
+      headers: { 'content-type': 'application/json', 'accept': 'text/event-stream' },
       body: JSON.stringify({
         message: dto.message,
         session_id: dto.sessionId,
@@ -78,16 +80,16 @@ export class AgentController {
     res.setHeader('Connection', 'keep-alive')
     res.flushHeaders()
 
-    const reader = upstream.body!.getReader()
+    const reader = upstream.body!.getReader() as ReadableStreamDefaultReader<Uint8Array>
     const decoder = new TextDecoder()
     let buffer = ''
 
     try {
-      while (true) {
-        const { done, value } = await reader.read()
-        if (done) break
+      for (;;) {
+        const result = await reader.read()
+        if (result.done) break
 
-        buffer += decoder.decode(value, { stream: true })
+        buffer += decoder.decode(result.value, { stream: true })
         const parts = buffer.split('\n\n')
         buffer = parts.pop() ?? ''
 
@@ -98,22 +100,37 @@ export class AgentController {
           const json = dataLine.slice('data: '.length).trim()
           if (!json) continue
 
-          try {
-            const event = JSON.parse(json) as { type: string; delta?: string }
+          const eventType = parseAgUiEventType(json)
+          if (!eventType) continue
 
-            if (event.type === 'TEXT_MESSAGE_CONTENT' && event.delta !== undefined) {
-              res.write(`0:${JSON.stringify(event.delta)}\n`)
-            } else if (event.type === 'RUN_FINISHED') {
-              res.write(`e:${JSON.stringify({ finishReason: 'stop' })}\n`)
-              res.write(`d:${JSON.stringify({ finishReason: 'stop' })}\n`)
+          if (eventType === EventType.TEXT_MESSAGE_CONTENT) {
+            const event = TextMessageContentEventSchema.safeParse(JSON.parse(json))
+            if (event.success && event.data.delta !== undefined) {
+              res.write(`${formatDataStreamPart('text', event.data.delta)}\n`)
             }
-          } catch {
-            // malformed JSON — skip
+          } else if (eventType === EventType.RUN_FINISHED) {
+            res.write(`${formatDataStreamPart('finish_step', { isContinued: false, finishReason: 'stop' })}\n`)
+            res.write(`${formatDataStreamPart('finish_message', { finishReason: 'stop', usage: { promptTokens: 0, completionTokens: 0 } })}\n`)
           }
         }
       }
     } finally {
       res.end()
     }
+  }
+}
+
+function parseAgUiEventType(json: string): EventType | null {
+  try {
+    const parsed: unknown = JSON.parse(json)
+    if (typeof parsed === 'object' && parsed !== null && 'type' in parsed) {
+      const type = (parsed as Record<string, unknown>).type
+      if (Object.values(EventType).includes(type as EventType)) {
+        return type as EventType
+      }
+    }
+    return null
+  } catch {
+    return null
   }
 }
