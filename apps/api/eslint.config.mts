@@ -1,5 +1,9 @@
 import { GLOB_TESTS, composeConfig } from '@infra-x/eslint-config'
 import { defineConfig } from 'eslint/config'
+// @ts-expect-error -- no type declarations for eslint-plugin-drizzle
+import drizzle from 'eslint-plugin-drizzle'
+
+import type { ESLint } from 'eslint'
 
 const API_TEST_FILES = [
   ...GLOB_TESTS,
@@ -85,6 +89,11 @@ const baseConfig = defineConfig({
     },
     imports: true,
   }),
+  plugins: { drizzle: drizzle as unknown as ESLint.Plugin },
+  rules: {
+    'drizzle/enforce-delete-with-where': ['error', { drizzleObjectName: 'db' }],
+    'drizzle/enforce-update-with-where': ['error', { drizzleObjectName: 'db' }],
+  },
 })
 
 const vitestConfig = defineConfig({

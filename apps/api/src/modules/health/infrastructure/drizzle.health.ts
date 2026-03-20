@@ -13,7 +13,7 @@ import type { HealthIndicatorResult } from '@nestjs/terminus'
  */
 @Injectable()
 export class DrizzleHealthIndicator {
-  constructor(@Inject(DB_TOKEN) private readonly database: DrizzleDb) {}
+  constructor(@Inject(DB_TOKEN) private readonly db: DrizzleDb) {}
 
   /**
    * Check the database connection health
@@ -24,7 +24,7 @@ export class DrizzleHealthIndicator {
   async isHealthy(key: string): Promise<HealthIndicatorResult> {
     try {
       // Execute a simple SELECT 1 to test the database connection
-      await this.database.execute(sql`SELECT 1`)
+      await this.db.execute(sql`SELECT 1`)
 
       return {
         [key]: {
