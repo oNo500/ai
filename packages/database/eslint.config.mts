@@ -1,4 +1,4 @@
-import { composeConfig } from '@workspace/eslint-config'
+import { composeConfig } from '@infra-x/eslint-config'
 
 import type { Linter } from 'eslint'
 
@@ -7,9 +7,6 @@ const config: Linter.Config[] = [
     typescript: {
       tsconfigRootDir: import.meta.dirname,
     },
-    depend:{
-      allowed: ['dotenv'],
-    }
   }),
   {
     files: ['scripts/**/*.ts'],
