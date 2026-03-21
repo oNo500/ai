@@ -9,10 +9,10 @@ import { ToolCallIndicator } from '@/features/chat/components/tool-call-indicato
 import { useAgentChat } from '@/features/chat/hooks/use-agent-chat'
 
 interface ChatWindowProps {
-  chatId: string
+  chatId?: string
 }
 
-export function ChatWindow({ chatId }: ChatWindowProps) {
+export function ChatWindow({ chatId = '' }: ChatWindowProps) {
   const { messages, toolCalls, isLoading, sendMessage, stop } = useAgentChat(chatId)
   const [input, setInput] = useState('')
   const inputRef = useRef<HTMLInputElement>(null)
