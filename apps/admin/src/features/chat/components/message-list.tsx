@@ -1,38 +1,31 @@
 import { ScrollArea } from '@workspace/ui/components/scroll-area'
 
-import type { UIMessage } from 'ai'
+import type { ChatMessage } from '@/features/chat/hooks/use-agent-chat'
 
 interface MessageListProps {
-  messages: UIMessage[]
+  messages: ChatMessage[]
 }
 
 export function MessageList({ messages }: MessageListProps) {
   return (
     <ScrollArea className="flex-1">
       <div className="flex flex-col gap-4 p-4">
-        {messages.map((msg) => {
-          const text = msg.parts
-            .filter((p) => p.type === 'text')
-            .map((p) => p.text)
-            .join('')
-
-          return (
+        {messages.map((msg) => (
+          <div
+            key={msg.id}
+            className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+          >
             <div
-              key={msg.id}
-              className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+              className={`max-w-[70%] rounded-lg px-4 py-2 text-sm whitespace-pre-wrap ${
+                msg.role === 'user'
+                  ? 'bg-primary text-primary-foreground'
+                  : 'bg-muted text-foreground'
+              }`}
             >
-              <div
-                className={`max-w-[70%] rounded-lg px-4 py-2 text-sm whitespace-pre-wrap ${
-                  msg.role === 'user'
-                    ? 'bg-primary text-primary-foreground'
-                    : 'bg-muted text-foreground'
-                }`}
-              >
-                {text || <span className="animate-pulse">▍</span>}
-              </div>
+              {msg.content || <span className="animate-pulse">▍</span>}
             </div>
-          )
-        })}
+          </div>
+        ))}
       </div>
     </ScrollArea>
   )
