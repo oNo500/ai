@@ -8,7 +8,7 @@
   },
   "scripts": {
     "gen": "pnpm gen:api && pnpm gen:agentic",
-    "gen:api": "openapi-typescript http://localhost:3000/openapi-json -o src/api.d.ts",
+    "gen:api": "openapi-typescript http://localhost:3000/openapi.yaml -o src/api.d.ts",
     "gen:agentic": "openapi-typescript http://localhost:8000/openapi.json -o src/agentic.d.ts"
   },
   "devDependencies": {
