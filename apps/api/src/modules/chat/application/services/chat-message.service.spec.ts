@@ -1,5 +1,7 @@
 import { vi } from 'vitest'
 
+import type { MockInstance } from 'vitest'
+
 import { createChatMocks } from '@/__tests__/unit/factories/mock-factory'
 import { ChatMessageService } from '@/modules/chat/application/services/chat-message.service'
 
@@ -28,7 +30,7 @@ function makeAgUiSseBody(events: object[]): ReadableStream<Uint8Array> {
 describe('chatMessageService', () => {
   let service: ChatMessageService
   let mocks: ReturnType<typeof createChatMocks>
-  let fetchSpy: ReturnType<typeof vi.spyOn>
+  let fetchSpy: MockInstance<typeof fetch>
 
   beforeEach(() => {
     mocks = createChatMocks()

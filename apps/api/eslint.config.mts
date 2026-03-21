@@ -105,6 +105,10 @@ const vitestConfig = defineConfig({
     stylistic: false,
     depend: false,
   }),
+  rules: {
+    // supertest's .expect(statusCode) counts as an assertion
+    'vitest/expect-expect': ['error', { assertFunctionNames: ['expect', '**.expect'] }],
+  },
 })
 
 export default [...baseConfig, ...vitestConfig]

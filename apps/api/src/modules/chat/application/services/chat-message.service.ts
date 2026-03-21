@@ -1,11 +1,11 @@
+import { EventType } from '@ag-ui/core'
 import { Inject, Injectable } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
-import { EventType } from '@ag-ui/core'
 
 import { CHAT_MESSAGE_REPOSITORY } from '@/modules/chat/application/ports/chat-message.repository.port'
 
-import type { ChatMessageRepository } from '@/modules/chat/application/ports/chat-message.repository.port'
 import type { Env } from '@/app/config/env.schema'
+import type { ChatMessageRepository } from '@/modules/chat/application/ports/chat-message.repository.port'
 import type { ChatMessage } from '@workspace/database'
 
 @Injectable()
@@ -24,7 +24,7 @@ export class ChatMessageService {
     return this.chatMessageRepository.findByChatId(chatId)
   }
 
-  async *streamMessage(
+  async* streamMessage(
     chatId: string,
     userText: string,
     accept: string,
@@ -40,7 +40,7 @@ export class ChatMessageService {
     const agUiMessages = history.map((m) => ({
       id: m.id,
       role: m.role,
-      content: (m.parts as Array<{ type: string; text?: string }>)
+      content: (m.parts as { type: string, text?: string }[])
         .filter((p) => p.type === 'text')
         .map((p) => p.text ?? '')
         .join(''),
@@ -60,7 +60,7 @@ export class ChatMessageService {
       }),
     })
 
-    const reader = upstream.body!.getReader()
+    const reader = upstream.body!.getReader() as ReadableStreamDefaultReader<Uint8Array>
     const decoder = new TextDecoder()
     let buffer = ''
     let assistantContent = ''
@@ -82,7 +82,7 @@ export class ChatMessageService {
           const json = dataLine.slice('data: '.length).trim()
           if (!json) continue
           try {
-            const event = JSON.parse(json) as { type: string; delta?: string }
+            const event = JSON.parse(json) as { type: EventType, delta?: string }
             if (event.type === EventType.TEXT_MESSAGE_CONTENT && event.delta) {
               assistantContent += event.delta
             }

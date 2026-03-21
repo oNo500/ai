@@ -16,6 +16,8 @@ import type { UserRepository } from '@/modules/auth/application/ports/user.repos
 import type { IdentityRepository } from '@/modules/identity/application/ports/user.repository.port'
 import type { JobRepository } from '@/modules/order/application/ports/job.repository.port'
 import type { OrderRepository } from '@/modules/order/application/ports/order.repository.port'
+import type { ChatMessageRepository } from '@/modules/chat/application/ports/chat-message.repository.port'
+import type { ChatRepository } from '@/modules/chat/application/ports/chat.repository.port'
 import type { CachePort } from '@/shared-kernel/application/ports/cache.port'
 import type { ConfigService } from '@nestjs/config'
 import type { JwtService } from '@nestjs/jwt'
@@ -64,8 +66,8 @@ export function createUserMocks() {
 
 export function createChatMocks() {
   return {
-    chatRepository: createMock<import('@/modules/chat/application/ports/chat.repository.port').ChatRepository>(),
-    chatMessageRepository: createMock<import('@/modules/chat/application/ports/chat-message.repository.port').ChatMessageRepository>(),
+    chatRepository: createMock<ChatRepository>(),
+    chatMessageRepository: createMock<ChatMessageRepository>(),
     configService: createMock<ConfigService>(),
   }
 }

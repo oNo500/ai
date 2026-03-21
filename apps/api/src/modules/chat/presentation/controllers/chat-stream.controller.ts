@@ -49,8 +49,8 @@ export class ChatStreamController {
     await this.chatService.getChat(chatId, req.user.id)
 
     const lastUserMessage = [...(dto.messages ?? [])]
-      .reverse()
-      .find((m): m is { role: string; content: string } =>
+      .toReversed()
+      .find((m): m is { role: string, content: string } =>
         typeof m === 'object' && m !== null && (m as { role: string }).role === 'user',
       )
     const userText = lastUserMessage?.content ?? ''
