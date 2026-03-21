@@ -1,8 +1,7 @@
 'use client'
 
-import { useCallback, useEffect, useRef, useState } from 'react'
-
 import { HttpAgent } from '@ag-ui/client'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
 import { env } from '@/config/env'
 import { getToken } from '@/lib/token'
@@ -33,7 +32,7 @@ export function useAgentChat(chatId: string) {
       headers: token ? { Authorization: `Bearer ${token}` } : {},
     })
       .then((r) => r.json())
-      .then((data: Array<{ id: string; role: string; parts: Array<{ type: string; text?: string }> }>) => {
+      .then((data: { id: string, role: string, parts: { type: string, text?: string }[] }[]) => {
         setMessages(
           data.map((m) => ({
             id: m.id,
@@ -42,7 +41,9 @@ export function useAgentChat(chatId: string) {
           })),
         )
       })
-      .catch(() => {})
+      .catch(() => {
+        //
+      })
   }, [chatId])
 
   const sendMessage = useCallback(async (text: string) => {
@@ -95,9 +96,9 @@ export function useAgentChat(chatId: string) {
           },
         },
       )
-    } catch (err) {
-      if ((err as Error).name !== 'AbortError') {
-        const message = err instanceof Error ? err.message : 'Failed to connect to agent'
+    } catch (error_) {
+      if ((error_ as Error).name !== 'AbortError') {
+        const message = error_ instanceof Error ? error_.message : 'Failed to connect to agent'
         setError(new Error(message))
         setMessages((prev) =>
           prev.map((m) =>

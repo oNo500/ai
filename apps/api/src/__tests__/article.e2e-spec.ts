@@ -1,5 +1,6 @@
 import { createTestApp } from './helpers/create-app'
-import { createRequest } from './helpers/create-request'
+import { registerAndLogin } from './helpers/create-authenticated-request'
+import { createAuthRequest } from './helpers/create-request'
 
 import type { INestApplication } from '@nestjs/common'
 
@@ -27,13 +28,18 @@ interface ArticleResponse {
 
 describe('response format', () => {
   let app: INestApplication
+  let token: string
   let createdArticleId: string
+
+  const auth = () => createAuthRequest(app, token)
 
   beforeAll(async () => {
     app = await createTestApp()
+    const prefix = globalThis.e2ePrefix ?? `e2e-${Date.now()}`
+    token = await registerAndLogin(app, `${prefix}-article-fmt@test.com`, 'Password123', 'ArticleFmtUser')
 
     // Create a test article to be reused by subsequent test cases
-    const res = await createRequest(app)
+    const res = await auth()
       .post('/api/articles')
       .send({
         title: 'Response Format Test Article',
@@ -46,7 +52,7 @@ describe('response format', () => {
 
   afterAll(async () => {
     if (createdArticleId) {
-      await createRequest(app).delete(`/api/articles/${createdArticleId}`)
+      await auth().delete(`/api/articles/${createdArticleId}`)
     }
     await app.close()
   })
@@ -57,7 +63,7 @@ describe('response format', () => {
 
   describe('success response format', () => {
     it('gET single resource: returns object directly without object/data wrapper', async () => {
-      const res = await createRequest(app)
+      const res = await auth()
         .get(`/api/articles/${createdArticleId}`)
         .expect(200)
 
@@ -75,7 +81,7 @@ describe('response format', () => {
     })
 
     it('pOST 201 Created: response body is a single resource object', async () => {
-      const res = await createRequest(app)
+      const res = await auth()
         .post('/api/articles')
         .send({
           title: 'Another Test Article For Format',
@@ -90,11 +96,11 @@ describe('response format', () => {
       expect(body).not.toHaveProperty('object')
 
       // Cleanup
-      await createRequest(app).delete(`/api/articles/${body.id as string}`)
+      await auth().delete(`/api/articles/${body.id as string}`)
     })
 
     it('pOST 201 Created: response header contains Location', async () => {
-      const res = await createRequest(app)
+      const res = await auth()
         .post('/api/articles')
         .send({
           title: 'Location Header Test Article',
@@ -109,11 +115,11 @@ describe('response format', () => {
       expect(res.headers.location).toContain(articleId)
 
       // Cleanup
-      await createRequest(app).delete(`/api/articles/${articleId}`)
+      await auth().delete(`/api/articles/${articleId}`)
     })
 
     it('all success responses include X-Request-Id header', async () => {
-      const res = await createRequest(app)
+      const res = await auth()
         .get(`/api/articles/${createdArticleId}`)
         .expect(200)
 
@@ -131,7 +137,7 @@ describe('response format', () => {
     it('404: contains all required RFC 9457 fields', async () => {
       const nonExistentId = '00000000-0000-0000-0000-000000000000'
 
-      const res = await createRequest(app)
+      const res = await auth()
         .get(`/api/articles/${nonExistentId}`)
         .expect(404)
 
@@ -148,7 +154,7 @@ describe('response format', () => {
     it('404: code and detail fields are strings', async () => {
       const nonExistentId = '00000000-0000-0000-0000-000000000000'
 
-      const res = await createRequest(app)
+      const res = await auth()
         .get(`/api/articles/${nonExistentId}`)
         .expect(404)
 
@@ -159,7 +165,7 @@ describe('response format', () => {
     })
 
     it('422 validation error: errors array contains field-level info (field, pointer, code, message)', async () => {
-      const res = await createRequest(app)
+      const res = await auth()
         .post('/api/articles')
         .send({
           title: 'Ab', // fewer than 5 characters, triggers MinLength validation
@@ -185,10 +191,10 @@ describe('response format', () => {
 
     it('400 business error: code and detail fields are present', async () => {
       // Publish the article first, then publish again to trigger 400 business error
-      await createRequest(app)
+      await auth()
         .patch(`/api/articles/${createdArticleId}/publish`)
 
-      const res = await createRequest(app)
+      const res = await auth()
         .patch(`/api/articles/${createdArticleId}/publish`)
         .expect(400)
 
@@ -203,7 +209,7 @@ describe('response format', () => {
     it('error response Content-Type is application/problem+json', async () => {
       const nonExistentId = '00000000-0000-0000-0000-000000000000'
 
-      const res = await createRequest(app)
+      const res = await auth()
         .get(`/api/articles/${nonExistentId}`)
         .expect(404)
 
@@ -217,7 +223,7 @@ describe('response format', () => {
 
   describe('response headers', () => {
     it('all responses (success) include X-Request-Id', async () => {
-      const res = await createRequest(app)
+      const res = await auth()
         .get(`/api/articles/${createdArticleId}`)
         .expect(200)
 
@@ -227,7 +233,7 @@ describe('response format', () => {
     it('all responses (error) include X-Request-Id', async () => {
       const nonExistentId = '00000000-0000-0000-0000-000000000000'
 
-      const res = await createRequest(app)
+      const res = await auth()
         .get(`/api/articles/${nonExistentId}`)
         .expect(404)
 
@@ -235,7 +241,7 @@ describe('response format', () => {
     })
 
     it('201 response includes Location header pointing to the newly created resource', async () => {
-      const res = await createRequest(app)
+      const res = await auth()
         .post('/api/articles')
         .send({
           title: 'Location Path Verify Test',
@@ -253,11 +259,11 @@ describe('response format', () => {
       expect(location).toContain('/articles/')
 
       // Cleanup
-      await createRequest(app).delete(`/api/articles/${body.id}`)
+      await auth().delete(`/api/articles/${body.id}`)
     })
 
     it('error response Content-Type is application/problem+json', async () => {
-      const res = await createRequest(app)
+      const res = await auth()
         .post('/api/articles')
         .send({ title: 'Ab', content: 'x' })
         .expect(422)
@@ -272,7 +278,7 @@ describe('response format', () => {
 
   describe('collection response format', () => {
     it('gET /articles: object field is "list"', async () => {
-      const res = await createRequest(app)
+      const res = await auth()
         .get('/api/articles/all')
         .expect(200)
 
@@ -282,7 +288,7 @@ describe('response format', () => {
     })
 
     it('gET /articles: data is an array', async () => {
-      const res = await createRequest(app)
+      const res = await auth()
         .get('/api/articles/all')
         .expect(200)
 
@@ -292,7 +298,7 @@ describe('response format', () => {
     })
 
     it('gET /articles: non-paginated endpoint does not contain page/total fields', async () => {
-      const res = await createRequest(app)
+      const res = await auth()
         .get('/api/articles/all')
         .expect(200)
 
@@ -311,16 +317,21 @@ describe('response format', () => {
 
 describe('article E2E Tests', () => {
   let app: INestApplication
+  let token: string
   let createdArticleId: string
+
+  const auth = () => createAuthRequest(app, token)
 
   beforeAll(async () => {
     app = await createTestApp()
+    const prefix = globalThis.e2ePrefix ?? `e2e-${Date.now()}`
+    token = await registerAndLogin(app, `${prefix}-article-e2e@test.com`, 'Password123', 'ArticleE2EUser')
   })
 
   afterAll(async () => {
     // Cleanup: delete the article created during tests
     if (createdArticleId) {
-      await createRequest(app).delete(`/api/articles/${createdArticleId}`)
+      await auth().delete(`/api/articles/${createdArticleId}`)
     }
 
     await app.close()
@@ -334,7 +345,7 @@ describe('article E2E Tests', () => {
           'This is an E2E test article content with enough characters to pass validation.',
       }
 
-      const response = await createRequest(app)
+      const response = await auth()
         .post('/api/articles')
         .send(createDto)
         .expect(201)
@@ -355,7 +366,7 @@ describe('article E2E Tests', () => {
         content: 'Valid content with enough characters for testing.',
       }
 
-      const response = await createRequest(app)
+      const response = await auth()
         .post('/api/articles')
         .send(createDto)
         .expect(422)
@@ -367,7 +378,7 @@ describe('article E2E Tests', () => {
 
   describe('/articles/:id (GET) - get article', () => {
     it('should successfully retrieve the created article', async () => {
-      const response = await createRequest(app)
+      const response = await auth()
         .get(`/api/articles/${createdArticleId}`)
         .expect(200)
 
@@ -379,7 +390,7 @@ describe('article E2E Tests', () => {
     it('should return 404 when article does not exist', async () => {
       const nonExistentId = '00000000-0000-0000-0000-000000000000'
 
-      const response = await createRequest(app)
+      const response = await auth()
         .get(`/api/articles/${nonExistentId}`)
         .expect(404)
 
@@ -390,7 +401,7 @@ describe('article E2E Tests', () => {
 
   describe('/articles/:id/publish (PATCH) - publish article', () => {
     it('should successfully publish a draft article', async () => {
-      const response = await createRequest(app)
+      const response = await auth()
         .patch(`/api/articles/${createdArticleId}/publish`)
         .expect(200)
 
@@ -400,7 +411,7 @@ describe('article E2E Tests', () => {
     })
 
     it('publishing an already-published article should fail', async () => {
-      const response = await createRequest(app)
+      const response = await auth()
         .patch(`/api/articles/${createdArticleId}/publish`)
         .expect(400)
 
@@ -411,7 +422,7 @@ describe('article E2E Tests', () => {
 
   describe('/articles/:id/archive (PATCH) - archive article', () => {
     it('should successfully archive a published article', async () => {
-      const response = await createRequest(app)
+      const response = await auth()
         .patch(`/api/articles/${createdArticleId}/archive`)
         .expect(200)
 
@@ -422,7 +433,7 @@ describe('article E2E Tests', () => {
 
   describe('/articles/all (GET) - full list without pagination', () => {
     it('should return the full article list', async () => {
-      const response = await createRequest(app)
+      const response = await auth()
         .get('/api/articles/all')
         .expect(200)
 
@@ -434,7 +445,7 @@ describe('article E2E Tests', () => {
 
   describe('/articles/paginated (GET) - offset-paginated list', () => {
     it('should return a paginated article list', async () => {
-      const response = await createRequest(app)
+      const response = await auth()
         .get('/api/articles/paginated')
         .expect(200)
 
@@ -455,7 +466,7 @@ describe('article E2E Tests', () => {
     })
 
     it('supports page and pageSize query parameters', async () => {
-      const response = await createRequest(app)
+      const response = await auth()
         .get('/api/articles/paginated?page=1&pageSize=2')
         .expect(200)
 
@@ -467,7 +478,7 @@ describe('article E2E Tests', () => {
 
   describe('/articles/cursor (GET) - cursor-paginated list', () => {
     it('should return a cursor-paginated article list', async () => {
-      const response = await createRequest(app)
+      const response = await auth()
         .get('/api/articles/cursor')
         .expect(200)
 
@@ -485,14 +496,14 @@ describe('article E2E Tests', () => {
 
     it('paginating with nextCursor should return correct results', async () => {
       // Create a second article to ensure at least 2 exist for cursor pagination
-      const extra = await createRequest(app)
+      const extra = await auth()
         .post('/api/articles')
         .send({ title: 'Cursor Test Extra Article', content: 'Extra content for cursor pagination test.' })
         .expect(201)
       const extraId = (extra.body as { id: string }).id
 
       // use pageSize=1 to fetch the first page
-      const firstResponse = await createRequest(app)
+      const firstResponse = await auth()
         .get('/api/articles/cursor?pageSize=1')
         .expect(200)
 
@@ -506,7 +517,7 @@ describe('article E2E Tests', () => {
       expect(firstBody.nextCursor).not.toBeNull()
 
       // Use nextCursor to fetch the second page
-      const secondResponse = await createRequest(app)
+      const secondResponse = await auth()
         .get(`/api/articles/cursor?pageSize=1&cursor=${firstBody.nextCursor!}`)
         .expect(200)
 
@@ -516,14 +527,14 @@ describe('article E2E Tests', () => {
       expect(secondBody.data[0]?.id).not.toBe(firstBody.data[0]?.id)
 
       // Cleanup extra article
-      await createRequest(app).delete(`/api/articles/${extraId}`)
+      await auth().delete(`/api/articles/${extraId}`)
     })
   })
 
   describe('full business flow test', () => {
     it('should complete the full flow: create -> publish -> archive -> delete', async () => {
       // 1. Create article
-      const createResponse = await createRequest(app)
+      const createResponse = await auth()
         .post('/api/articles')
         .send({
           title: 'Flow Test Article',
@@ -536,7 +547,7 @@ describe('article E2E Tests', () => {
       expect(createdArticle.status).toBe('draft')
 
       // 2. Publish article
-      const publishResponse = await createRequest(app)
+      const publishResponse = await auth()
         .patch(`/api/articles/${articleId}/publish`)
         .expect(200)
 
@@ -544,7 +555,7 @@ describe('article E2E Tests', () => {
       expect(publishedArticle.status).toBe('published')
 
       // 3. Archive article
-      const archiveResponse = await createRequest(app)
+      const archiveResponse = await auth()
         .patch(`/api/articles/${articleId}/archive`)
         .expect(200)
 
@@ -552,10 +563,10 @@ describe('article E2E Tests', () => {
       expect(archivedArticle.status).toBe('archived')
 
       // 4. Delete article
-      await createRequest(app).delete(`/api/articles/${articleId}`).expect(200)
+      await auth().delete(`/api/articles/${articleId}`).expect(200)
 
       // 5. Verify article has been deleted
-      await createRequest(app).get(`/api/articles/${articleId}`).expect(404)
+      await auth().get(`/api/articles/${articleId}`).expect(404)
     })
   })
 })

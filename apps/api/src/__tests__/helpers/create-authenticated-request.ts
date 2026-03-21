@@ -18,7 +18,7 @@ export async function registerAndLogin(
   app: INestApplication,
   email: string,
   password: string,
-  name = 'Test User',
+  name = 'TestUser',
 ): Promise<string> {
   await createRequest(app)
     .post('/api/auth/register')
