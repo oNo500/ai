@@ -1,18 +1,40 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
-import { IsOptional, IsString } from 'class-validator'
+import { IsArray, IsOptional, IsString } from 'class-validator'
 
 export class AgentInvokeDto {
-  @ApiProperty({ example: 'What is the current time?' })
+  @ApiProperty()
   @IsString()
-  message: string
+  threadId: string
 
-  @ApiPropertyOptional({ example: 'session-123' })
+  @ApiProperty()
+  @IsString()
+  runId: string
+
+  @ApiPropertyOptional()
   @IsString()
   @IsOptional()
-  sessionId?: string
+  parentRunId?: string
 
-  @ApiPropertyOptional({ example: 'user-42' })
-  @IsString()
+  @ApiPropertyOptional()
   @IsOptional()
-  userId?: string
+  state?: unknown
+
+  @ApiPropertyOptional({ type: [Object] })
+  @IsArray()
+  @IsOptional()
+  messages?: unknown[]
+
+  @ApiPropertyOptional({ type: [Object] })
+  @IsArray()
+  @IsOptional()
+  tools?: unknown[]
+
+  @ApiPropertyOptional({ type: [Object] })
+  @IsArray()
+  @IsOptional()
+  context?: unknown[]
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  forwardedProps?: unknown
 }

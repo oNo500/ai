@@ -19,6 +19,7 @@ import { TraceContextInterceptor } from '@/app/interceptors/trace-context.interc
 import { LoggerModule } from '@/app/logger/logger.module'
 import { ETagMiddleware } from '@/app/middleware/etag.middleware'
 import { AgentModule } from '@/modules/agent/agent.module'
+import { ChatModule } from '@/modules/chat/chat.module'
 import { AnalyticsModule } from '@/modules/analytics/analytics.module'
 import { ArticleModule } from '@/modules/article/article.module'
 import { AuditLogModule } from '@/modules/audit-log/audit-log.module'
@@ -95,6 +96,7 @@ import type { NestModule, MiddlewareConsumer } from '@nestjs/common'
     UploadModule, // File upload (Multer + local storage)
     AnalyticsModule, // Analytics dashboard data endpoints
     AgentModule, // Agent module (AG-UI SSE proxy)
+    ChatModule, // Chat module (persistent chat sessions + AG-UI stream)
   ],
   providers: [
     // Global guards (order matters: JWT first, then roles, then throttler)

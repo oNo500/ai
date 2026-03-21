@@ -61,3 +61,11 @@ export function createUserMocks() {
     eventPublisher: createMock<DomainEventPublisher>(),
   }
 }
+
+export function createChatMocks() {
+  return {
+    chatRepository: createMock<import('@/modules/chat/application/ports/chat.repository.port').ChatRepository>(),
+    chatMessageRepository: createMock<import('@/modules/chat/application/ports/chat-message.repository.port').ChatMessageRepository>(),
+    configService: createMock<ConfigService>(),
+  }
+}
