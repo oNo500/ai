@@ -1,8 +1,8 @@
 import { vi } from 'vitest'
 
 import { createTestApp } from './helpers/create-app'
-import { registerAndLogin, withToken } from './helpers/create-authenticated-request'
-import { createRequest } from './helpers/create-request'
+import { registerAndLogin } from './helpers/create-authenticated-request'
+import { createAuthRequest, createRequest } from './helpers/create-request'
 
 import type { INestApplication } from '@nestjs/common'
 import type { MockInstance } from 'vitest'
@@ -39,6 +39,8 @@ describe('chat E2E', () => {
   let token: string
   let fetchSpy: MockInstance<typeof fetch>
 
+  const auth = () => createAuthRequest(app, token)
+
   beforeAll(async () => {
     app = await createTestApp()
     const email = `${globalThis.e2ePrefix}-chat@example.com`
@@ -49,9 +51,9 @@ describe('chat E2E', () => {
     await app.close()
   })
 
-  describe('POST /api/chats', () => {
+  describe('pOST /api/chats', () => {
     it('creates a chat and returns 201', async () => {
-      const res = await withToken(createRequest(app), token)
+      const res = await auth()
         .post('/api/chats')
         .send({ title: 'Test Chat' })
         .expect(201)
@@ -63,7 +65,7 @@ describe('chat E2E', () => {
     })
 
     it('uses default title when not provided', async () => {
-      const res = await withToken(createRequest(app), token)
+      const res = await auth()
         .post('/api/chats')
         .send({})
         .expect(201)
@@ -76,12 +78,12 @@ describe('chat E2E', () => {
     })
   })
 
-  describe('GET /api/chats', () => {
+  describe('gET /api/chats', () => {
     it('returns list of chats for the authenticated user', async () => {
-      await withToken(createRequest(app), token).post('/api/chats').send({ title: 'Chat A' })
-      await withToken(createRequest(app), token).post('/api/chats').send({ title: 'Chat B' })
+      await auth().post('/api/chats').send({ title: 'Chat A' })
+      await auth().post('/api/chats').send({ title: 'Chat B' })
 
-      const res = await withToken(createRequest(app), token).get('/api/chats').expect(200)
+      const res = await auth().get('/api/chats').expect(200)
 
       const chats = res.body as ChatResponse[]
       expect(Array.isArray(chats)).toBe(true)
@@ -93,42 +95,42 @@ describe('chat E2E', () => {
     })
   })
 
-  describe('DELETE /api/chats/:id', () => {
+  describe('dELETE /api/chats/:id', () => {
     it('deletes a chat owned by the user', async () => {
-      const createRes = await withToken(createRequest(app), token)
+      const createRes = await auth()
         .post('/api/chats')
         .send({ title: 'To Delete' })
 
       const chatId = (createRes.body as ChatResponse).id
 
-      await withToken(createRequest(app), token).delete(`/api/chats/${chatId}`).expect(204)
+      await auth().delete(`/api/chats/${chatId}`).expect(204)
     })
 
     it('returns 403 when deleting another user\'s chat', async () => {
       const otherEmail = `${globalThis.e2ePrefix}-chat2@example.com`
       const otherToken = await registerAndLogin(app, otherEmail, 'Password123!')
 
-      const createRes = await withToken(createRequest(app), otherToken)
+      const createRes = await createAuthRequest(app, otherToken)
         .post('/api/chats')
         .send({ title: 'Other User Chat' })
       const chatId = (createRes.body as ChatResponse).id
 
-      await withToken(createRequest(app), token).delete(`/api/chats/${chatId}`).expect(403)
+      await auth().delete(`/api/chats/${chatId}`).expect(403)
     })
   })
 
-  describe('GET /api/chats/:chatId/messages', () => {
+  describe('gET /api/chats/:chatId/messages', () => {
     let chatId: string
 
     beforeAll(async () => {
-      const res = await withToken(createRequest(app), token)
+      const res = await auth()
         .post('/api/chats')
         .send({ title: 'Messages Test' })
       chatId = (res.body as ChatResponse).id
     })
 
     it('returns empty array for new chat', async () => {
-      const res = await withToken(createRequest(app), token)
+      const res = await auth()
         .get(`/api/chats/${chatId}/messages`)
         .expect(200)
 
@@ -143,17 +145,17 @@ describe('chat E2E', () => {
       const otherEmail = `${globalThis.e2ePrefix}-chat3@example.com`
       const otherToken = await registerAndLogin(app, otherEmail, 'Password123!')
 
-      await withToken(createRequest(app), otherToken)
+      await createAuthRequest(app, otherToken)
         .get(`/api/chats/${chatId}/messages`)
         .expect(403)
     })
   })
 
-  describe('POST /api/chats/:chatId/messages/stream', () => {
+  describe('pOST /api/chats/:chatId/messages/stream', () => {
     let chatId: string
 
     beforeEach(async () => {
-      const res = await withToken(createRequest(app), token)
+      const res = await auth()
         .post('/api/chats')
         .send({ title: 'Stream Test' })
       chatId = (res.body as ChatResponse).id
@@ -177,7 +179,7 @@ describe('chat E2E', () => {
     })
 
     it('returns 200 with text/event-stream', async () => {
-      const res = await withToken(createRequest(app), token)
+      const res = await auth()
         .post(`/api/chats/${chatId}/messages/stream`)
         .send({ threadId: chatId, runId: 'r1', messages: [{ role: 'user', content: 'Hi' }], state: {}, tools: [], context: [], forwardedProps: null })
         .expect(200)
@@ -186,11 +188,11 @@ describe('chat E2E', () => {
     })
 
     it('persists user and assistant messages in DB after stream', async () => {
-      await withToken(createRequest(app), token)
+      await auth()
         .post(`/api/chats/${chatId}/messages/stream`)
         .send({ threadId: chatId, runId: 'r1', messages: [{ role: 'user', content: 'Hi' }], state: {}, tools: [], context: [], forwardedProps: null })
 
-      const historyRes = await withToken(createRequest(app), token)
+      const historyRes = await auth()
         .get(`/api/chats/${chatId}/messages`)
         .expect(200)
 
@@ -202,7 +204,7 @@ describe('chat E2E', () => {
 
     it('passes full history to agentic service on second message', async () => {
       // First message
-      await withToken(createRequest(app), token)
+      await auth()
         .post(`/api/chats/${chatId}/messages/stream`)
         .send({ threadId: chatId, runId: 'r1', messages: [{ role: 'user', content: 'First' }], state: {}, tools: [], context: [], forwardedProps: null })
 
@@ -215,7 +217,7 @@ describe('chat E2E', () => {
       )
 
       // Second message
-      await withToken(createRequest(app), token)
+      await auth()
         .post(`/api/chats/${chatId}/messages/stream`)
         .send({ threadId: chatId, runId: 'r2', messages: [{ role: 'user', content: 'Second' }], state: {}, tools: [], context: [], forwardedProps: null })
 
