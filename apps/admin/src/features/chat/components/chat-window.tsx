@@ -5,11 +5,10 @@ import { Input } from '@workspace/ui/components/input'
 import { useRef, useState } from 'react'
 
 import { MessageList } from '@/features/chat/components/message-list'
-import { ToolCallIndicator } from '@/features/chat/components/tool-call-indicator'
 import { useAgentChat } from '@/features/chat/hooks/use-agent-chat'
 
 export function ChatWindow() {
-  const { messages, toolCalls, isLoading, sendMessage, stop } = useAgentChat()
+  const { messages, isLoading, sendMessage, stop } = useAgentChat()
   const [input, setInput] = useState('')
   const inputRef = useRef<HTMLInputElement>(null)
 
@@ -24,7 +23,6 @@ export function ChatWindow() {
   return (
     <div className="flex h-full flex-col">
       <MessageList messages={messages} />
-      <ToolCallIndicator toolCalls={toolCalls} />
       <form onSubmit={handleSubmit} className="flex items-center gap-2 border-t p-4">
         <Input
           ref={inputRef}
