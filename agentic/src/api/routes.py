@@ -3,6 +3,7 @@ import uuid
 
 from ag_ui.core import (
     EventType,
+    RunAgentInput,
     RunErrorEvent,
     RunFinishedEvent,
     RunStartedEvent,
@@ -88,21 +89,22 @@ async def invoke(request: InvokeRequest, req: Request):
     allowed, _ = await check_rate_limit(req, request.user_id)
     if not allowed:
         raise HTTPException(status_code=429, detail="Rate limit exceeded")
+    from langchain_core.messages import HumanMessage
     agent = get_default_agent()
-    thread_id = request.session_id or "anonymous"
-    result = await agent.ainvoke(request.message, thread_id=thread_id, user_id=request.user_id)
+    result = await agent.ainvoke([HumanMessage(content=request.message)], user_id=request.user_id)
     content = result["messages"][-1].content
     return InvokeResponse(content=content)
 
 
 @router.post("/stream")
 async def stream(request: InvokeRequest):
+    from langchain_core.messages import HumanMessage
     agent = get_default_agent()
-    thread_id = request.session_id or "anonymous"
     user_id = request.user_id
+    lc_messages = [HumanMessage(content=request.message)]
 
     async def event_generator():
-        async for chunk, _ in agent.astream(request.message, thread_id=thread_id, user_id=user_id):
+        async for chunk, _ in agent.astream(lc_messages, user_id=user_id):
             if hasattr(chunk, "content") and chunk.content:
                 data = json.dumps({"type": "token", "content": chunk.content})
                 yield f"data: {data}\n\n"
@@ -111,12 +113,26 @@ async def stream(request: InvokeRequest):
     return StreamingResponse(event_generator(), media_type="text/event-stream")
 
 
+def _to_langchain_messages(messages: list) -> list:
+    from langchain_core.messages import AIMessage, HumanMessage
+
+    lc = []
+    for m in messages:
+        content = m.content if isinstance(m.content, str) else str(m.content)
+        if m.role == "user":
+            lc.append(HumanMessage(content=content))
+        elif m.role == "assistant":
+            lc.append(AIMessage(content=content))
+    return lc
+
+
 @router.post("/stream/agui")
-async def stream_agui(request: InvokeRequest, req: Request):
+async def stream_agui(request: RunAgentInput, req: Request):
     agent = get_default_agent()
-    thread_id = request.session_id or "anonymous"
-    user_id = request.user_id
-    run_id = str(uuid.uuid4())
+    user_id = str(request.forwarded_props.get("user_id", "default")) if isinstance(request.forwarded_props, dict) else "default"
+    run_id = request.run_id
+    thread_id = request.thread_id
+    lc_messages = _to_langchain_messages(request.messages or [])
     message_id = str(uuid.uuid4())
     encoder = EventEncoder(accept=req.headers.get("accept"))
 
@@ -131,9 +147,7 @@ async def stream_agui(request: InvokeRequest, req: Request):
         )
 
         try:
-            async for chunk, _ in agent.astream(
-                request.message, thread_id=thread_id, user_id=user_id
-            ):
+            async for chunk, _ in agent.astream(lc_messages, user_id=user_id):
                 if hasattr(chunk, "content") and chunk.content:
                     yield encoder.encode(
                         TextMessageContentEvent(
