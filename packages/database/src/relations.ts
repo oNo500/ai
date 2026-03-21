@@ -4,6 +4,9 @@ import {
   usersTable,
   accountsTable,
   sessionsTable,
+  chatsTable,
+  chatMessagesTable,
+  messageEvalsTable,
 } from './schemas'
 
 /**
@@ -34,4 +37,46 @@ export const sessionsRelations = relations(sessionsTable, ({ one }) => ({
     fields: [sessionsTable.userId],
     references: [usersTable.id],
   }),
+}))
+
+/**
+ * Chats table relations
+ */
+export const chatsRelations = relations(chatsTable, ({ one, many }) => ({
+  user: one(usersTable, {
+    fields: [chatsTable.userId],
+    references: [usersTable.id],
+  }),
+  messages: many(chatMessagesTable),
+}))
+
+/**
+ * Chat messages table relations
+ */
+export const chatMessagesRelations = relations(chatMessagesTable, ({ one }) => ({
+  chat: one(chatsTable, {
+    fields: [chatMessagesTable.chatId],
+    references: [chatsTable.id],
+  }),
+  eval: one(messageEvalsTable, {
+    fields: [chatMessagesTable.id],
+    references: [messageEvalsTable.messageId],
+  }),
+}))
+
+/**
+ * Message evals table relations
+ */
+export const messageEvalsRelations = relations(messageEvalsTable, ({ one }) => ({
+  message: one(chatMessagesTable, {
+    fields: [messageEvalsTable.messageId],
+    references: [chatMessagesTable.id],
+  }),
+}))
+
+/**
+ * Users table — extend with chats relation
+ */
+export const usersChatsRelations = relations(usersTable, ({ many }) => ({
+  chats: many(chatsTable),
 }))
