@@ -28,7 +28,7 @@ def create_production_agent(spec: AgentSpec) -> ProductionAgent:
         enable_long_term=spec.enable_long_term_memory,
         mem0_config=settings.build_mem0_config(),
     )
-    compiled = build_graph(llm, spec.tools, memory.checkpointer, spec=spec)
+    compiled = build_graph(llm, spec.tools, checkpointer=None, spec=spec)
     return ProductionAgent(spec=spec, _compiled=compiled, _memory=memory)
 
 
@@ -40,72 +40,56 @@ class ProductionAgent:
 
     async def ainvoke(
         self,
-        user_message: str,
+        messages: list[Any],
         *,
-        thread_id: str,
         user_id: str = "default",
     ) -> dict[str, Any]:
-        from langchain_core.messages import HumanMessage, SystemMessage
+        from langchain_core.messages import SystemMessage
 
-        messages: list[Any] = [HumanMessage(content=user_message)]
         if self.spec.system_prompt:
-            messages.insert(0, SystemMessage(content=self.spec.system_prompt))
+            messages = [SystemMessage(content=self.spec.system_prompt), *messages]
 
         if self._memory:
             messages = await self._memory.inject_long_term_context(
                 messages, user_id=user_id, agent_id=self.spec.name
             )
 
-        config = {"configurable": {"thread_id": thread_id}}
         state = {
             "messages": messages,
             "user_id": user_id,
-            "session_id": thread_id,
+            "session_id": None,
             "reflection_count": 0,
             "blocked": False,
             "block_reason": None,
         }
-        result = await self._compiled.ainvoke(state, config=config)
-
-        if self._memory:
-            await self._memory.save_session(
-                result.get("messages", []),
-                user_id=user_id,
-                session_id=thread_id,
-                agent_id=self.spec.name,
-            )
-
-        return result
+        return await self._compiled.ainvoke(state)
 
     async def astream(
         self,
-        user_message: str,
+        messages: list[Any],
         *,
-        thread_id: str,
         user_id: str = "default",
         stream_mode: str = "messages",
     ) -> AsyncIterator[Any]:
-        from langchain_core.messages import HumanMessage, SystemMessage
+        from langchain_core.messages import SystemMessage
 
-        messages: list[Any] = [HumanMessage(content=user_message)]
         if self.spec.system_prompt:
-            messages.insert(0, SystemMessage(content=self.spec.system_prompt))
+            messages = [SystemMessage(content=self.spec.system_prompt), *messages]
 
         if self._memory:
             messages = await self._memory.inject_long_term_context(
                 messages, user_id=user_id, agent_id=self.spec.name
             )
 
-        config = {"configurable": {"thread_id": thread_id}}
         state = {
             "messages": messages,
             "user_id": user_id,
-            "session_id": thread_id,
+            "session_id": None,
             "reflection_count": 0,
             "blocked": False,
             "block_reason": None,
         }
-        async for chunk in self._compiled.astream(state, config=config, stream_mode=stream_mode):
+        async for chunk in self._compiled.astream(state, stream_mode=stream_mode):
             if isinstance(chunk, tuple):
                 yield chunk
             else:

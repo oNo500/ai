@@ -11,7 +11,7 @@ from src.agent.state import AgentState
 def build_graph(
     llm: Any,
     tools: list[BaseTool],
-    checkpointer: Any,
+    checkpointer: Any = None,
     spec: Any = None,
 ) -> Any:
     from src.agent.nodes import make_node_call_model
@@ -60,7 +60,9 @@ def build_graph(
         )
         builder.add_edge("tools", "model")
 
-    compile_kwargs: dict = {"checkpointer": checkpointer}
+    compile_kwargs: dict = {}
+    if checkpointer is not None:
+        compile_kwargs["checkpointer"] = checkpointer
     if enable_human_loop:
         compile_kwargs["interrupt_before"] = ["tools"]
     return builder.compile(**compile_kwargs)
